@@ -251,6 +251,24 @@
         let db, auth, user, currentLang = 'zh';
         let hasLiked = localStorage.getItem('liked_' + appId) === 'true';
 
+        // 備援語錄庫 (當 AI 無法連線時使用)
+        const localFallbacks = {
+            zh: [
+                "聚焦卓越 啟迪智慧 ✨ 願教育之火傳承不息 🏫",
+                "凝聚教育共識 攜手共創未來 🌟 祝大會圓滿成功 🎓",
+                "用心經營學校 用愛灌溉幼苗 🌱 誠摯祝福各位領袖 🍎",
+                "教育領航 開拓視野 🏫 共築教育美好願景 ✨",
+                "跨越巔峰 追求卓越 🏆 願會議激盪智慧火花 🌟"
+            ],
+            en: [
+                "Leading with wisdom, teaching with heart 🏫 ✨ Success to all!",
+                "Building the future through educational excellence 🎓 🌟",
+                "United for the future of our children 🍎 🌱",
+                "Inspiring minds, shaping tomorrow 🏫 ✨",
+                "Together we lead, together we grow 🏆 🌟"
+            ]
+        };
+
         const i18n = {
             zh: { hSub: "校長會議", hMain: "貴賓簽到與祝福", welcome: "歡迎各位教育領袖蒞臨。您的每一份祝福都是支持我們前行的正能量。", aiBtn: "AI 智繪祝福", submit: "提交簽到訊息", success: "提交成功", successMsg: "您的資料已同步。", like: "請為活動點讚", liked: "感謝支持", stats: "累計教育正能量", aiPrompt: "請以校長身份撰寫一段溫暖、具備教育遠見且精簡（25字內）的會議祝福語。請在祝福語中適當加入 1-2 個相關的 Emoji（如 🍎, 🏫, ✨）。注意：除了中文字、英文字、數字與 Emoji 之外，絕對不可以出現任何特殊符號（例如引號、星號、分節符、括號或標點符號）。直接輸出純文字內容。" },
             en: { hSub: "PRINCIPAL CONFERENCE", hMain: "GUEST WELCOME", welcome: "Welcome leaders. Your blessing provides positive energy.", aiBtn: "AI Magic", submit: "Submit Entry", success: "Success", successMsg: "Data synchronized.", like: "LIKE THE EVENT", liked: "SUPPORTED", stats: "ENERGY STATS", aiPrompt: "Write a short principal's blessing (max 15 words) with 1-2 Emojis (e.g. 🏫, 🎓). NO special characters (quotes, stars, brackets) except letters, numbers, and emojis. Direct text output only." }
@@ -317,15 +335,21 @@
 
             try {
                 let text = await callGemini();
-                // 進階過濾：移除引號、星號、反斜槓、以及 AI 常見的 Markdown 符號
-                // 保留：中文字、英文字母、數字、Emoji (Unicode Range)
+                // 嚴格過濾邏輯
                 const cleanText = text.trim()
-                    .replace(/[\*\"\'\`\#\-\(\)\[\]\{\}\>\<\/\\]/g, '') // 移除大部分特殊符號
-                    .replace(/\s+/g, ' '); // 壓縮空格
+                    .replace(/[\*\"\'\`\#\-\(\)\[\]\{\}\>\<\/\=\+\_\?\!\.\,\;\:\|\\～]|(?![ \u4e00-\u9fa5a-zA-Z0-9\uD83C\uDF00-\uDFFF\uD83D\uDC00-\uDE4F\uDE80-\uDEFF]).(?<=\p{P})/gu, '')
+                    .replace(/\s+/g, ' '); 
                 
-                textarea.value = cleanText;
+                textarea.value = cleanText || localFallbacks[currentLang][Math.floor(Math.random() * localFallbacks[currentLang].length)];
             } catch (error) {
-                showModal('error', 'AI 構思失敗', '暫時無法連線到 AI 服務，請手動輸入。');
+                // 備援邏輯：從在地庫隨機挑選一則
+                const fallbacks = localFallbacks[currentLang];
+                const randomMsg = fallbacks[Math.floor(Math.random() * fallbacks.length)];
+                textarea.value = randomMsg;
+                
+                console.warn("AI service unavailable, using local fallback.");
+                // 告知使用者目前使用備援（可選）
+                // showModal('info', 'AI 構思忙碌中', '已為您自動生成預設祝福語。');
             } finally {
                 loader.classList.add('hidden');
                 aiBtn.disabled = false;
@@ -390,7 +414,7 @@
             const m = document.getElementById('status-modal');
             document.getElementById('modal-title').innerText = title;
             document.getElementById('modal-msg').innerText = msg;
-            document.getElementById('modal-icon').innerHTML = type === 'success' ? '✅' : '❌';
+            document.getElementById('modal-icon').innerHTML = type === 'success' ? '✅' : (type === 'error' ? '❌' : 'ℹ️');
             m.classList.remove('opacity-0', 'pointer-events-none');
         }
 
