@@ -233,13 +233,12 @@
         </div>
     </div>
 
-    <!-- 狀態提示框 -->
     <div id="status-modal" class="fixed inset-0 bg-black/90 backdrop-blur-xl flex items-center justify-center opacity-0 pointer-events-none transition-all z-[100]">
         <div class="glass-panel p-10 rounded-[40px] max-w-lg w-full text-center">
             <div id="modal-icon" class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 bg-white/5 border border-white/10"></div>
             <h3 id="modal-title" class="text-2xl font-bold text-white mb-3"></h3>
             <p id="modal-msg" class="text-base text-gray-400 mb-8 font-light"></p>
-            <button onclick="closeModal()" class="w-full py-4 bg-white/10 hover:bg-white/20 text-white text-lg font-semibold rounded-2xl transition-all">關閉</button>
+            <button id="close-modal-btn" class="w-full py-4 bg-white/10 hover:bg-white/20 text-white text-lg font-semibold rounded-2xl transition-all">關閉</button>
         </div>
     </div>
 
@@ -254,17 +253,14 @@
           projectId: "project-8750994532548258918",
           storageBucket: "project-8750994532548258918.firebasestorage.app",
           messagingSenderId: "655473516916",
-          appId: "1:655473516916:web:b971f0b7ae005b82558c21",
-          measurementId: "G-5CQB83LMY5"
+          appId: "1:655473516916:web:b971f0b7ae005b82558c21"
         };
 
-        const googleSheetUrl = ""; 
-        const appId = 'principal-conference-v1';
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'principal-conference-v1';
         let db, auth, user;
         let currentLang = 'zh';
         let hasLiked = localStorage.getItem('liked_' + appId) === 'true';
 
-        // 備援祝福庫
         const fallbackBlessings = [
             "凝聚智慧，共創教育新巔峰 ✨",
             "領航未來，成就孩子無限可能 🎓",
@@ -301,12 +297,7 @@
                 auth = getAuth(app);
                 db = getFirestore(app);
                 
-                // 執行登入
-                signInAnonymously(auth).then(() => {
-                    console.log("Firebase Auth Success");
-                }).catch(err => {
-                    console.error("Firebase Auth Fail (需在控制台開啟匿名登入):", err);
-                });
+                await signInAnonymously(auth);
 
                 onAuthStateChanged(auth, (u) => {
                     if (u) {
@@ -315,32 +306,26 @@
                         setupSync();
                     }
                 });
-            } catch (e) { console.error("Firebase Global Init Error:", e); }
+            } catch (e) { console.error("Firebase Init Error:", e); }
         }
 
         function setupSync() {
-            try {
-                const regCol = collection(db, 'artifacts', appId, 'public', 'data', 'registrations');
-                onSnapshot(regCol, (snap) => {
-                    const data = snap.docs.map(d => d.data()).sort((a,b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
-                    renderWall(data);
-                }, (err) => console.error("Firestore Wall Listen Error:", err));
+            if (!user) return;
+            const regCol = collection(db, 'artifacts', appId, 'public', 'data', 'registrations');
+            onSnapshot(regCol, (snap) => {
+                const data = snap.docs.map(d => d.data()).sort((a,b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+                renderWall(data);
+            }, (err) => console.error("Firestore Listen Error:", err));
 
-                const statsDoc = doc(db, 'artifacts', appId, 'public', 'data', 'stats', 'counter');
-                onSnapshot(statsDoc, (snap) => {
-                    if (snap.exists()) document.getElementById('total-likes').innerText = snap.data().likes || 0;
-                }, (err) => console.error("Firestore Stats Listen Error:", err));
-            } catch (err) {
-                console.error("Setup Sync Error:", err);
-            }
+            const statsDoc = doc(db, 'artifacts', appId, 'public', 'data', 'stats', 'counter');
+            onSnapshot(statsDoc, (snap) => {
+                if (snap.exists()) document.getElementById('total-likes').innerText = snap.data().likes || 0;
+            }, (err) => console.error("Stats Listen Error:", err));
         }
 
         document.getElementById('guest-form').onsubmit = async (e) => {
             e.preventDefault();
-            if (!user) {
-                showModal('error', '未連線', '資料庫尚未準備就緒，請重新整理頁面。');
-                return;
-            }
+            if (!user) return;
             const btn = document.getElementById('submit-btn');
             btn.disabled = true;
 
@@ -349,24 +334,19 @@
                 organization: document.getElementById('organization').value,
                 title: document.getElementById('title-field').value,
                 blessing: document.getElementById('blessing').value,
-                time: new Date().toLocaleString()
+                timestamp: serverTimestamp()
             };
 
             try {
                 const regCol = collection(db, 'artifacts', appId, 'public', 'data', 'registrations');
-                await addDoc(regCol, { ...formData, timestamp: serverTimestamp() });
-
+                await addDoc(regCol, formData);
                 showModal('success', i18n[currentLang].success, i18n[currentLang].successMsg);
                 document.getElementById('guest-form').reset();
             } catch (err) { 
-                console.error("Submission error:", err);
-                showModal('error', '提交失敗', '可能是權限設定問題，請檢查 Firebase Rule 或匿名登入是否開啟。');
-            } finally { 
-                btn.disabled = false; 
-            }
+                showModal('error', '提交失敗', '請稍後再試。');
+            } finally { btn.disabled = false; }
         };
 
-        // 核心：AI 功能加強穩定性
         async function doAI() {
             const loader = document.getElementById('ai-loader');
             const input = document.getElementById('blessing');
@@ -375,35 +355,26 @@
             loader.classList.remove('hidden');
             aiBtnText.innerText = "...";
             
-            // 此處提供一個替換的測試 Key (請確保在 Google Cloud 控制台未限制 Referrer)
-            const apiKey = "AIzaSyBzOTEWz81BVWOSSW2hIbSCMhkhFXo_UgE"; 
+            const apiKey = ""; 
             
             try {
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 6000); // 6秒超時
-
                 const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    signal: controller.signal,
                     body: JSON.stringify({ 
                         contents: [{ 
-                            parts: [{ text: "扮演校長會議參與者。請生成一句繁體中文祝福語(15字內，含一個Emoji)。" }] 
-                        }],
-                        generationConfig: { temperature: 0.8, maxOutputTokens: 50 }
+                            parts: [{ text: "請生成一句適合校長會議的精煉祝福語（15字內，含一個相關 Emoji）。" }] 
+                        }]
                     })
                 });
 
-                clearTimeout(timeoutId);
                 const data = await response.json();
-                
-                if (data.candidates && data.candidates[0].content) {
+                if (data.candidates?.[0]?.content?.parts?.[0]?.text) {
                     input.value = data.candidates[0].content.parts[0].text.replace(/["\n]/g, "").trim();
                 } else {
-                    throw new Error("API Limit or Secret Error");
+                    throw new Error();
                 }
             } catch (err) { 
-                console.warn("AI 失敗，改用預設庫:", err);
                 input.value = fallbackBlessings[Math.floor(Math.random() * fallbackBlessings.length)];
             } finally { 
                 loader.classList.add('hidden'); 
@@ -411,25 +382,30 @@
             }
         }
 
+        // 修改點讚函式：使用 setDoc 以確保資料夾結構正確
         async function doLike(e) {
-            if (hasLiked) return;
-            if (!user) {
-                console.warn("User not authed for like");
-                return;
-            }
-            hasLiked = true; localStorage.setItem('liked_' + appId, 'true'); 
-            updateUI(); createLikeAnimation(e);
+            if (hasLiked || !user) return;
+            hasLiked = true; 
+            localStorage.setItem('liked_' + appId, 'true'); 
+            updateUI(); 
+            createLikeAnimation(e);
             
             const statsDoc = doc(db, 'artifacts', appId, 'public', 'data', 'stats', 'counter');
             try { 
-                await updateDoc(statsDoc, { likes: increment(1) }); 
+                // 使用 setDoc 配合 merge，如果文件不存在會自動創建，如果存在則遞增
+                await setDoc(statsDoc, { 
+                    likes: increment(1),
+                    lastUpdated: serverTimestamp()
+                }, { merge: true }); 
             } catch (err) { 
-                console.log("Creating stats doc...");
-                await setDoc(statsDoc, { likes: 1 }, { merge: true }); 
+                console.error("Like recording failed:", err);
+                // 如果失敗則恢復本地狀態以便重試
+                hasLiked = false;
+                localStorage.removeItem('liked_' + appId);
+                updateUI();
             }
         }
 
-        // --- UI Helper Functions ---
         function createLikeAnimation(e) {
             for(let i=0; i<8; i++) {
                 const b = document.createElement('div'); b.className = 'like-burst';
@@ -486,13 +462,24 @@
             m.classList.remove('opacity-0', 'pointer-events-none');
         }
 
-        window.closeModal = () => document.getElementById('status-modal').classList.add('opacity-0', 'pointer-events-none');
-        document.getElementById('show-input-btn').onclick = () => { document.getElementById('input-section').classList.remove('hidden'); document.getElementById('display-section').classList.add('hidden'); document.getElementById('show-input-btn').classList.add('active'); document.getElementById('show-display-btn').classList.remove('active'); };
-        document.getElementById('show-display-btn').onclick = () => { document.getElementById('input-section').classList.add('hidden'); document.getElementById('display-section').classList.remove('hidden'); document.getElementById('show-display-btn').classList.add('active'); document.getElementById('show-input-btn').classList.remove('active'); };
+        document.getElementById('close-modal-btn').onclick = () => document.getElementById('status-modal').classList.add('opacity-0', 'pointer-events-none');
+        document.getElementById('show-input-btn').onclick = () => { 
+            document.getElementById('input-section').classList.remove('hidden'); 
+            document.getElementById('display-section').classList.add('hidden'); 
+            document.getElementById('show-input-btn').classList.add('active'); 
+            document.getElementById('show-display-btn').classList.remove('active'); 
+        };
+        document.getElementById('show-display-btn').onclick = () => { 
+            document.getElementById('input-section').classList.add('hidden'); 
+            document.getElementById('display-section').classList.remove('hidden'); 
+            document.getElementById('show-display-btn').classList.add('active'); 
+            document.getElementById('show-input-btn').classList.remove('active'); 
+        };
         document.getElementById('ai-btn').onclick = doAI;
         document.getElementById('event-like-btn').onclick = doLike;
         document.getElementById('lang-zh-btn').onclick = () => { currentLang='zh'; updateUI(); document.getElementById('lang-zh-btn').classList.add('active'); document.getElementById('lang-en-btn').classList.remove('active'); };
         document.getElementById('lang-en-btn').onclick = () => { currentLang='en'; updateUI(); document.getElementById('lang-en-btn').classList.add('active'); document.getElementById('lang-zh-btn').classList.remove('active'); };
+
         function createParticles() {
             const c = document.getElementById('particle-container');
             for (let i = 0; i < 20; i++) {
@@ -502,7 +489,8 @@
                 c.appendChild(p);
             }
         }
-        init();
+        
+        window.onload = init;
     </script>
 </body>
 </html>
