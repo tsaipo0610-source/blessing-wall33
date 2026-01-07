@@ -144,14 +144,14 @@
                                     <div class="flex justify-between items-center mb-2">
                                         <label class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">留言祝福</label>
                                         <button type="button" id="ai-btn" class="ai-magic-btn px-3 py-1.5 rounded-full text-[10px] font-bold text-white flex items-center gap-1">
-                                            <span>✨</span> AI 智繪
+                                            <span>✨</span> 智慧靈感
                                         </button>
                                     </div>
                                     <textarea id="blessing" name="blessing" rows="3" maxlength="100" required class="w-full rounded-xl px-4 py-4 text-white resize-none" placeholder="輸入祝福辭..."></textarea>
                                     <div id="ai-loader" class="absolute inset-0 bg-black/80 backdrop-blur-sm rounded-xl flex items-center justify-center hidden z-20">
                                         <div class="flex flex-col items-center">
                                             <div class="w-6 h-6 border-2 border-[#E5C07B] border-t-transparent rounded-full animate-spin mb-2"></div>
-                                            <span class="text-[10px] text-[#E5C07B] tracking-widest">AI 構思中...</span>
+                                            <span class="text-[10px] text-[#E5C07B] tracking-widest">挑選合適語錄...</span>
                                         </div>
                                     </div>
                                 </div>
@@ -212,32 +212,61 @@
             appId: "1:655473516916:web:b971f0b7ae005b82558c21"
         };
 
-        // --- 使用使用者提供的 API Key ---
-        const apiKey = "AIzaSyBzOTEWz81BVWOSSW2hIbSCMhkhFXo_UgE"; 
         const appId = 'principal-conference-v1';
         let db, auth, user, currentLang = 'zh';
         let hasLiked = localStorage.getItem('liked_' + appId) === 'true';
 
+        // 預設 20 組專業語錄 (中英對照)
         const localFallbacks = {
             zh: [
                 "教育領航，共譜未來 ✨ 祝大會圓滿順利 🏫",
                 "聚焦卓越，啟迪智慧 🍎 願我們攜手共創教育新篇章 ✨",
                 "用心經營，用愛灌溉 🌱 祝福大會凝聚教育正能量 🎓",
                 "深耕教育，引領先機 🚀 共同見證教育轉型力量 🏫",
-                "智慧連結，共創非凡 🌟 祝各位校長平安健康 ✨"
+                "智慧連結，共創非凡 🌟 祝各位校長平安健康 ✨",
+                "以終為始，卓越領航 🏆 祝今日會議智慧迸發 🎓",
+                "點亮學子希望，共築教育夢想 🌟 ✨",
+                "互助共好，引領校園邁向巔峰 🏫 🌱",
+                "創新思維，永續教育 🌍 祝大會交流成果豐碩 ✨",
+                "教育是一場溫柔的革命，感謝各位領航員 🍎 ✨",
+                "凝聚共識，跨越巔峰 ⛰️ 預祝會議圓滿成功 ✨",
+                "智慧行政，科技賦能 💻 共探教育數位轉型亮點 🏫",
+                "讓教育有溫度，讓學習有廣度 🌱 祝福大會 ✨",
+                "共學共榮，開創教育無限可能 🌈 🎓",
+                "深化素養教育，培養未來人才 🚀 ✨",
+                "立足在地，放眼國際 🌍 祝校長大會順利完成 🏫",
+                "傾聽師生心聲，建構幸福校園 🏠 ✨",
+                "攜手同心，為孩子撐起一片藍天 ☁️ 🍎",
+                "專業領導，卓越治理 🏆 願會議激盪精彩火花 ✨",
+                "百年大計，教育為本 🎓 祝各位校長辦學有成 ✨"
             ],
             en: [
                 "Leading with wisdom, shaping the future 🏫 ✨",
                 "United for excellence in education 🎓 🍎",
                 "Nurturing hearts, inspiring minds 🌱 ✨",
                 "Connecting leaders, empowering schools 🏫 🌟",
-                "Together for a brighter educational vision 🏆 ✨"
+                "Together for a brighter educational vision 🏆 ✨",
+                "Igniting passion, fostering growth in every child 🍎 ✨",
+                "Innovation in leadership, excellence in learning 🚀 🏫",
+                "Shaping the world, one classroom at a time 🌍 🎓",
+                "Empowering teachers, inspiring students 🌱 🌟",
+                "Bridging today with the brilliance of tomorrow ✨ 🏫",
+                "Excellence through collaboration and vision 🏆 ✨",
+                "Compassionate leadership for a better future 🏠 🌱",
+                "A journey of a thousand miles starts with one lesson 🚀",
+                "Unlocking the potential of every educational leader 🎓 ✨",
+                "Cultivating wisdom and integrity in our schools 🍎 🌟",
+                "Global vision, local impact in education 🌍 🏫",
+                "Building resilient schools for a dynamic world ✨",
+                "Every child matters, every leader inspires 🌱 🎓",
+                "The future of education starts here, together 🏫 🌟",
+                "Wisdom to lead, courage to change 🏆 ✨"
             ]
         };
 
         const i18n = {
-            zh: { hSub: "Principal Conference", hMain: "貴賓簽到與祝福系統", welcome: "歡迎各位教育領航者。您的祝福將即時展示在大螢幕上，為會議凝聚卓越動能。", aiBtn: "AI 智繪", submit: "確認簽到", success: "簽到成功", successMsg: "您的祝福已同步至大螢幕。", like: "點讚大會", liked: "感謝支持", stats: "大會正能量", aiPrompt: "撰寫一段溫暖且專業的校長會議祝福語。限30字內，加入1-2個Emoji如🏫, ✨。不要使用引號、括號等標點。直接輸出文字。" },
-            en: { hSub: "Principal Conference", hMain: "Guest Sign-in System", welcome: "Welcome leaders. Your blessing will be displayed on the screen to inspire excellence.", aiBtn: "AI Magic", submit: "Sign In", success: "Success", successMsg: "Your message is now on the big screen.", like: "Like Event", liked: "Supported", stats: "Energy Units", aiPrompt: "Write a short professional blessing for a principal conference. Max 15 words. Use 1-2 emojis like 🏫, ✨. No punctuation. Direct text only." }
+            zh: { hSub: "Principal Conference", hMain: "貴賓簽到與祝福系統", welcome: "歡迎各位教育領航者。您的祝福將即時展示在大螢幕上，為會議凝聚卓越動能。", aiBtn: "智慧靈感", submit: "確認簽到", success: "簽到成功", successMsg: "您的祝福已同步至大螢幕。", like: "點讚大會", liked: "感謝支持", stats: "大會正能量" },
+            en: { hSub: "Principal Conference", hMain: "Guest Sign-in System", welcome: "Welcome leaders. Your blessing will be displayed on the screen to inspire excellence.", aiBtn: "Smart Quote", submit: "Sign In", success: "Success", successMsg: "Your message is now on the big screen.", like: "Like Event", liked: "Supported", stats: "Energy Units" }
         };
 
         async function init() {
@@ -269,7 +298,8 @@
             });
         }
 
-        async function generateAIBlessing() {
+        // 離線靈感生成 (不再需要 API Key)
+        async function generateSmartBlessing() {
             const loader = document.getElementById('ai-loader');
             const textarea = document.getElementById('blessing');
             const aiBtn = document.getElementById('ai-btn');
@@ -277,45 +307,15 @@
             loader.classList.remove('hidden');
             aiBtn.disabled = true;
 
-            const getRandomFallback = () => {
+            // 模擬思考延遲 800ms
+            setTimeout(() => {
                 const list = localFallbacks[currentLang];
-                return list[Math.floor(Math.random() * list.length)];
-            };
-
-            // 實作指數退避的重試邏輯
-            async function fetchGemini(retries = 0) {
-                try {
-                    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            contents: [{ parts: [{ text: i18n[currentLang].aiPrompt }] }]
-                        })
-                    });
-
-                    if (!response.ok) throw new Error('API Error');
-                    const result = await response.json();
-                    return result.candidates?.[0]?.content?.parts?.[0]?.text || getRandomFallback();
-                } catch (err) {
-                    if (retries < 3) {
-                        const delay = Math.pow(2, retries) * 1000;
-                        await new Promise(r => setTimeout(r, delay));
-                        return fetchGemini(retries + 1);
-                    }
-                    throw err;
-                }
-            }
-
-            try {
-                const text = await fetchGemini();
-                textarea.value = text.trim().replace(/["'*()\[\]]/g, '').slice(0, 100);
-            } catch (error) {
-                console.warn("Using fallback due to AI service issue.");
-                textarea.value = getRandomFallback();
-            } finally {
+                const randomIndex = Math.floor(Math.random() * list.length);
+                textarea.value = list[randomIndex];
+                
                 loader.classList.add('hidden');
                 aiBtn.disabled = false;
-            }
+            }, 800);
         }
 
         document.getElementById('guest-form').onsubmit = async (e) => {
@@ -407,7 +407,7 @@
         document.getElementById('event-like-btn').onclick = doLike;
         document.getElementById('lang-zh-btn').onclick = () => { currentLang='zh'; updateUI(); document.getElementById('lang-zh-btn').classList.add('active'); document.getElementById('lang-en-btn').classList.remove('active'); };
         document.getElementById('lang-en-btn').onclick = () => { currentLang='en'; updateUI(); document.getElementById('lang-en-btn').classList.add('active'); document.getElementById('lang-zh-btn').classList.remove('active'); };
-        document.getElementById('ai-btn').onclick = generateAIBlessing;
+        document.getElementById('ai-btn').onclick = generateSmartBlessing;
 
         function createParticles() {
             const c = document.getElementById('particle-container');
