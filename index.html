@@ -14,6 +14,7 @@
             --dark-gold: #B8860B;
             --glass-bg: rgba(10, 15, 30, 0.9);
             --ai-blue: #38BDF8;
+            --heart-red: #FF4D4D;
         }
 
         body { 
@@ -51,6 +52,39 @@
 
         .submit-btn { background: linear-gradient(135deg, #E5C07B 0%, #B8860B 100%); color: #0A0F1E; font-weight: 700; letter-spacing: 0.2em; cursor: pointer; }
         
+        @keyframes subtle-shake {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-1deg); }
+            75% { transform: rotate(1deg); }
+        }
+        #event-like-btn:not(.liked-active) {
+            animation: subtle-shake 3s infinite ease-in-out;
+        }
+
+        .ripple {
+            position: absolute;
+            border: 2px solid var(--primary-gold);
+            border-radius: 50%;
+            transform: scale(0);
+            animation: ripple-out 0.8s ease-out;
+            pointer-events: none;
+        }
+        @keyframes ripple-out {
+            to { transform: scale(4); opacity: 0; }
+        }
+
+        .heart-particle {
+            position: absolute;
+            pointer-events: none;
+            z-index: 100;
+            font-size: 20px;
+            animation: fly-and-fade 1s forwards ease-out;
+        }
+        @keyframes fly-and-fade {
+            0% { transform: translate(0, 0) scale(0.5); opacity: 1; }
+            100% { transform: translate(var(--tx), var(--ty)) scale(1.5) rotate(var(--tr)); opacity: 0; }
+        }
+
         .ai-magic-btn {
             background: rgba(56, 189, 248, 0.1);
             border: 1px solid var(--ai-blue);
@@ -71,10 +105,12 @@
             padding: 1.5rem 2rem; 
             border-radius: 20px; 
             border-left: 8px solid var(--primary-gold);
-            min-width: 300px;
+            min-width: 320px;
+            position: relative;
+            overflow: hidden;
         }
 
-        .marquee-content { display: inline-block; animation: marquee 60s linear infinite; white-space: nowrap; }
+        .marquee-content { display: inline-block; animation: marquee 80s linear infinite; white-space: nowrap; }
         @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
 
         input, textarea { 
@@ -112,8 +148,8 @@
 
         <div class="flex flex-col h-full">
             <header class="mb-10 text-center lg:text-left">
-                <div id="header-sub" class="text-sm lg:text-xl font-light tracking-[0.5em] text-[#E5C07B] uppercase mb-2">Principal Conference</div>
-                <h1 id="header-main" class="text-3xl lg:text-6xl font-bold tracking-tight text-white border-t-2 border-white/10 pt-4">貴賓簽到與祝福系統</h1>
+                <div id="header-sub" class="text-lg lg:text-3xl font-light tracking-[0.5em] text-[#E5C07B] uppercase mb-3">校長會議</div>
+                <h1 id="header-main" class="text-3xl lg:text-6xl font-bold tracking-tight text-white border-t-2 border-white/10 pt-4">貴賓簽到與祝福</h1>
             </header>
 
             <main class="flex-grow flex items-center justify-center">
@@ -123,8 +159,8 @@
                             <h2 class="text-2xl font-light mb-4 text-white uppercase tracking-wider">Welcome</h2>
                             <p id="welcome-msg" class="text-gray-400 font-light leading-relaxed mb-8">歡迎各位教育領航者。您的祝福將即時展示在大螢幕上，為會議凝聚卓越動能。</p>
                             
-                            <button type="button" id="event-like-btn" class="w-full bg-white/5 border border-white/10 rounded-full py-4 flex items-center justify-center gap-3 transition-all active:scale-95 group">
-                                <svg id="heart-icon" class="w-6 h-6 stroke-white/40 fill-none transition-all duration-300" viewBox="0 0 24 24">
+                            <button type="button" id="event-like-btn" class="relative overflow-hidden w-full bg-white/5 border border-white/10 rounded-full py-4 flex items-center justify-center gap-3 transition-all active:scale-95 group">
+                                <svg id="heart-icon" class="w-6 h-6 stroke-white/40 fill-none transition-all duration-300 transform group-hover:scale-125" viewBox="0 0 24 24">
                                     <path d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
                                 </svg>
                                 <span id="like-btn-text" class="text-sm font-bold text-white/80 tracking-widest uppercase">點讚大會</span>
@@ -216,57 +252,116 @@
         let db, auth, user, currentLang = 'zh';
         let hasLiked = localStorage.getItem('liked_' + appId) === 'true';
 
-        // 預設 20 組專業語錄 (中英對照)
         const localFallbacks = {
             zh: [
-                "教育領航，共譜未來 ✨ 祝大會圓滿順利 🏫",
-                "聚焦卓越，啟迪智慧 🍎 願我們攜手共創教育新篇章 ✨",
-                "用心經營，用愛灌溉 🌱 祝福大會凝聚教育正能量 🎓",
-                "深耕教育，引領先機 🚀 共同見證教育轉型力量 🏫",
-                "智慧連結，共創非凡 🌟 祝各位校長平安健康 ✨",
-                "以終為始，卓越領航 🏆 祝今日會議智慧迸發 🎓",
-                "點亮學子希望，共築教育夢想 🌟 ✨",
-                "互助共好，引領校園邁向巔峰 🏫 🌱",
-                "創新思維，永續教育 🌍 祝大會交流成果豐碩 ✨",
-                "教育是一場溫柔的革命，感謝各位領航員 🍎 ✨",
-                "凝聚共識，跨越巔峰 ⛰️ 預祝會議圓滿成功 ✨",
+                "科技領導，創新人才 ✨ 祝校長大會圓滿順利 🏫",
+                "知時愛農，健康時尚 🍎 願教育與土地共生共榮 ✨",
+                "聚焦科技領導，啟迪創新人才 🚀 攜手共創教育新篇章 ✨",
+                "實踐知時愛農，追求健康時尚 🌱 祝福大會凝聚正能量 🎓",
+                "科技賦能教育，創新引領未來 🌟 祝各位校長平安健康 ✨",
+                "深耕在地文化，引航時尚教育 🏛️ 祝今日會議智慧迸發 🎓",
+                "點亮科技之光，共築人才夢想 🌟 ✨",
+                "知時守份，愛農情深 🌾 引領校園邁向頂尖卓越 🌱",
+                "創新思維領航，科技人才輩出 💻 祝大會交流成果豐碩 ✨",
+                "教育知時節，愛農續時尚 🍎 感謝各位領航員的付出 ✨",
+                "科技領導跨越巔峰，創新人才引領先機 ⛰️ 預祝會議圓滿成功 ✨",
                 "智慧行政，科技賦能 💻 共探教育數位轉型亮點 🏫",
-                "讓教育有溫度，讓學習有廣度 🌱 祝福大會 ✨",
-                "共學共榮，開創教育無限可能 🌈 🎓",
-                "深化素養教育，培養未來人才 🚀 ✨",
-                "立足在地，放眼國際 🌍 祝校長大會順利完成 🏫",
-                "傾聽師生心聲，建構幸福校園 🏠 ✨",
-                "攜手同心，為孩子撐起一片藍天 ☁️ 🍎",
+                "讓教育有溫度，讓人才有廣度 🌱 祝福大會圓滿 ✨",
+                "共學共榮，開創科技教育無限可能 🌈 🎓",
+                "知時、愛農、傳承、創新 🌾 深化素養教育，培養未來人才 🚀",
+                "立足在地農業心，放眼國際科技情 🌍 祝校長大會順利 🏫",
+                "傾聽師生心聲，建構健康時尚校園 🏠 ✨",
+                "攜手同心，為孩子撐起科技創新的藍天 ☁️ 🍎",
                 "專業領導，卓越治理 🏆 願會議激盪精彩火花 ✨",
-                "百年大計，教育為本 🎓 祝各位校長辦學有成 ✨"
+                "科技為基，教育為本 🎓 祝各位校長辦學有成 ✨",
+                "科技領導力，校園新活力 ⚡ 引領數位教育新浪潮 🌊",
+                "創新人才培育，扎根未來競爭力 🎯 祝大會順利完成 ✨",
+                "知時節，愛農事，懂時尚 🎩 創造有質感的校園生活 🍏",
+                "健康身心，時尚智慧 🧘 祝校長們教學行政皆順心 ✨",
+                "以科技連結世界，用創新翻轉教室 🌏 🎓",
+                "守護農業原鄉，開創科技願景 🌾 祝大會圓滿 ✨",
+                "數位轉型先鋒，教育卓越領航 🚀 ✨",
+                "健康校園，永續發展 🌱 願今日交流收穫滿滿 🏆",
+                "科技引領智慧，人才成就卓越 💎 ✨",
+                "知時而進，愛農而誠 🌿 引領師生追求真善美 🏫",
+                "教育創新不間斷，科技領導跑在前 🏃 ✨",
+                "健康為基石，時尚為羽翼 🕊️ 飛向教育新高峰 🏔️",
+                "培育具備國際觀的創新人才 🌐 祝會議圓滿 ✨",
+                "讓科技成為教育最堅強的後盾 🛡️ 🏫",
+                "在知時愛農中體悟生命價值 🍎 🌱",
+                "健康時尚新教育，卓越校長領航行 🚢 ✨",
+                "科技賦予教育靈魂，創新賦予人才力量 💪 🎓",
+                "厚植文化底蘊，接軌科技前沿 🏛️ ✨",
+                "知時應變，愛農深耕 🌾 祝會議啟發無限創意 💡",
+                "追求卓越，止於至善 🏆 願教育之路繁花盛開 ✨",
+                "科技領導數位時代，創新人才決勝未來 ⚔️ 🎓",
+                "愛農之心永續校園，健康之志引領風潮 🌊 🌱",
+                "智慧校園新典範，科技領導新篇章 📖 ✨",
+                "創新教育，從心開始 ❤️ 祝大會正能量滿滿 🔋",
+                "知時務，愛農桑 🌿 讓科技與人文和諧對話 ✨",
+                "健康管理校園，時尚演繹教學 🎨 🎓",
+                "培育未來領袖，科技引導之路 🛤️ ✨",
+                "以土地為根，以科技為葉 🌳 壯大教育之樹 🏫",
+                "科技領導新思維，創新人才新格局 🖼️ ✨",
+                "祝福大會圓滿成功，教育同仁共創高峰 ⛰️ ✨"
             ],
             en: [
-                "Leading with wisdom, shaping the future 🏫 ✨",
-                "United for excellence in education 🎓 🍎",
-                "Nurturing hearts, inspiring minds 🌱 ✨",
-                "Connecting leaders, empowering schools 🏫 🌟",
-                "Together for a brighter educational vision 🏆 ✨",
-                "Igniting passion, fostering growth in every child 🍎 ✨",
-                "Innovation in leadership, excellence in learning 🚀 🏫",
-                "Shaping the world, one classroom at a time 🌍 🎓",
-                "Empowering teachers, inspiring students 🌱 🌟",
-                "Bridging today with the brilliance of tomorrow ✨ 🏫",
-                "Excellence through collaboration and vision 🏆 ✨",
-                "Compassionate leadership for a better future 🏠 🌱",
-                "A journey of a thousand miles starts with one lesson 🚀",
-                "Unlocking the potential of every educational leader 🎓 ✨",
-                "Cultivating wisdom and integrity in our schools 🍎 🌟",
-                "Global vision, local impact in education 🌍 🏫",
-                "Building resilient schools for a dynamic world ✨",
-                "Every child matters, every leader inspires 🌱 🎓",
-                "The future of education starts here, together 🏫 🌟",
-                "Wisdom to lead, courage to change 🏆 ✨"
+                "Tech Leadership, Creative Talent ✨ Wishing the conference success! 🏫",
+                "Eco-Awareness & Healthy Lifestyle 🍎 Education in harmony with nature ✨",
+                "Leading with Technology, Inspiring Innovation 🚀 Shaping the future ✨",
+                "Sustainable Farming, Modern Living 🌱 Gathering positive energy 🎓",
+                "Empowering Education through Tech 🌟 Health to all principals ✨",
+                "Rooted in Heritage, Leading with Style 🏛️ Wishing for a wise exchange 🎓",
+                "Igniting Tech Potential, Building Dreams 🌟 ✨",
+                "Love for the Land, Vision for the Future 🌾 Reaching for excellence 🌱",
+                "Innovative Thinking, Tech-Savvy Talent 💻 Great results today ✨",
+                "Education in Season, Passion for the Soil 🍎 Thank you, leaders ✨",
+                "Tech Leadership reaching the peak ⛰️ Wishing for a perfect meeting ✨",
+                "Smart Admin, Powered by Tech 💻 Exploring digital transformation 🏫",
+                "Education with warmth, Talent with depth 🌱 Best wishes ✨",
+                "Co-learning and growing in Tech possibilities 🌈 🎓",
+                "Deepening literacy, cultivating future talent 🚀 ✨",
+                "Local heart, Global Tech vision 🌍 Success to the conference 🏫",
+                "Listening to voices, building a healthy modern campus 🏠 ✨",
+                "Hand in hand for a tech-innovative sky ☁️ 🍎",
+                "Professional Leadership, Global Governance 🏆 Sparkling insights ✨",
+                "Tech-based, Education-centered 🎓 Success to all schools ✨",
+                "Tech Leadership, Campus Vitality ⚡ Leading the digital wave 🌊",
+                "Cultivating talent, Rooting competitiveness 🎯 Best wishes ✨",
+                "Know the season, Love the farm 🎩 High-quality campus life 🍏",
+                "Healthy mind, Stylish wisdom 🧘 Smooth administration to all ✨",
+                "Connecting the world with Tech 🌏 🎓",
+                "Protecting rural heritage, Creating Tech vision 🌾 Success ✨",
+                "Pioneer of transformation, Leader of excellence 🚀 ✨",
+                "Healthy campus, Sustainable growth 🌱 Full of rewards 🏆",
+                "Tech leads wisdom, Talent achieves excellence 💎 ✨",
+                "Advancing with time, Sincerity in farming 🌿 Truth, Goodness, Beauty 🏫",
+                "Endless innovation, Leading in Tech 🏃 ✨",
+                "Health as foundation, Style as wings 🕊️ To the new peak 🏔️",
+                "Cultivating creative talent with global vision 🌐 ✨",
+                "Technology as the strongest support 🛡️ 🏫",
+                "Realizing life value in eco-awareness 🍎 🌱",
+                "Modern healthy education, Excellence in leadership 🚢 ✨",
+                "Tech gives soul, Innovation gives power 💪 🎓",
+                "Deep culture, Cutting-edge tech 🏛️ ✨",
+                "Deep farming, Adaptable wisdom 🌾 Infinite creativity 💡",
+                "Pursuing excellence to the best 🏆 Blossoming path ✨",
+                "Tech leads digital age, Talent wins the future ⚔️ 🎓",
+                "Sustainable heart, Leading the trend 🌊 🌱",
+                "Smart campus paradigm, New chapter of leadership 📖 ✨",
+                "Innovative education from the heart ❤️ Full of energy 🔋",
+                "Loving the soil 🌿 Harmony between tech and humanity ✨",
+                "Managing with health, Teaching with style 🎨 🎓",
+                "Cultivating future leaders via Tech path 🛤️ ✨",
+                "Land as root, Tech as leaf 🌳 Growing the education tree 🏫",
+                "New thinking in leadership, New patterns in talent 🖼️ ✨",
+                "Perfect success to the meeting, Reaching the peak together ⛰️ ✨"
             ]
         };
 
         const i18n = {
-            zh: { hSub: "Principal Conference", hMain: "貴賓簽到與祝福系統", welcome: "歡迎各位教育領航者。您的祝福將即時展示在大螢幕上，為會議凝聚卓越動能。", aiBtn: "智慧靈感", submit: "確認簽到", success: "簽到成功", successMsg: "您的祝福已同步至大螢幕。", like: "點讚大會", liked: "感謝支持", stats: "大會正能量" },
-            en: { hSub: "Principal Conference", hMain: "Guest Sign-in System", welcome: "Welcome leaders. Your blessing will be displayed on the screen to inspire excellence.", aiBtn: "Smart Quote", submit: "Sign In", success: "Success", successMsg: "Your message is now on the big screen.", like: "Like Event", liked: "Supported", stats: "Energy Units" }
+            zh: { hSub: "校長會議", hMain: "貴賓簽到與祝福", welcome: "歡迎各位教育領航者。您的祝福將即時展示在大螢幕上，為會議凝聚卓越動能。", aiBtn: "智慧靈感", submit: "確認簽到", success: "簽到成功", successMsg: "您的祝福已同步至大螢幕。", like: "點讚大會", liked: "感謝支持", stats: "大會正能量" },
+            en: { hSub: "Principal Conference", hMain: "Guest Sign-in & Blessing", welcome: "Welcome leaders. Your blessing will be displayed on the screen to inspire excellence.", aiBtn: "Smart Quote", submit: "Sign In", success: "Success", successMsg: "Your message is now on the big screen.", like: "Like Event", liked: "Supported", stats: "Energy Units" }
         };
 
         async function init() {
@@ -292,30 +387,89 @@
             onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'registrations'), (snap) => {
                 const data = snap.docs.map(d => d.data()).sort((a,b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
                 renderWall(data);
-            });
+            }, (err) => console.error(err));
             onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'stats', 'counter'), (snap) => {
                 if (snap.exists()) document.getElementById('total-likes').innerText = snap.data().likes || 0;
-            });
+            }, (err) => console.error(err));
         }
 
-        // 離線靈感生成 (不再需要 API Key)
         async function generateSmartBlessing() {
             const loader = document.getElementById('ai-loader');
             const textarea = document.getElementById('blessing');
             const aiBtn = document.getElementById('ai-btn');
-            
             loader.classList.remove('hidden');
             aiBtn.disabled = true;
-
-            // 模擬思考延遲 800ms
             setTimeout(() => {
                 const list = localFallbacks[currentLang];
-                const randomIndex = Math.floor(Math.random() * list.length);
-                textarea.value = list[randomIndex];
-                
+                textarea.value = list[Math.floor(Math.random() * list.length)];
                 loader.classList.add('hidden');
                 aiBtn.disabled = false;
             }, 800);
+        }
+
+        function spawnHearts(e) {
+            const btn = document.getElementById('event-like-btn');
+            const rect = btn.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+
+            for (let i = 0; i < 12; i++) {
+                const heart = document.createElement('div');
+                heart.className = 'heart-particle';
+                heart.innerHTML = '❤️';
+                heart.style.left = centerX + 'px';
+                heart.style.top = centerY + 'px';
+                
+                const angle = Math.random() * Math.PI * 2;
+                const dist = 100 + Math.random() * 150;
+                heart.style.setProperty('--tx', `${Math.cos(angle) * dist}px`);
+                heart.style.setProperty('--ty', `${Math.sin(angle) * dist}px`);
+                heart.style.setProperty('--tr', `${Math.random() * 360}deg`);
+                
+                document.body.appendChild(heart);
+                setTimeout(() => heart.remove(), 1000);
+            }
+
+            const ripple = document.createElement('div');
+            ripple.className = 'ripple';
+            ripple.style.left = (e.clientX || centerX) - 10 + 'px';
+            ripple.style.top = (e.clientY || centerY) - 10 + 'px';
+            ripple.style.width = ripple.style.height = '20px';
+            document.body.appendChild(ripple);
+            setTimeout(() => ripple.remove(), 800);
+        }
+
+        async function doLike(e) {
+            if (hasLiked || !user) return;
+            hasLiked = true;
+            localStorage.setItem('liked_' + appId, 'true');
+            
+            spawnHearts(e);
+            updateUI();
+
+            try {
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'stats', 'counter'), { 
+                    likes: increment(1), lastUpdated: serverTimestamp() 
+                }, { merge: true });
+            } catch (err) { hasLiked = false; updateUI(); }
+        }
+
+        function updateUI() {
+            const t = i18n[currentLang];
+            const btn = document.getElementById('event-like-btn');
+            document.getElementById('header-sub').innerText = t.hSub;
+            document.getElementById('header-main').innerText = t.hMain;
+            document.getElementById('welcome-msg').innerText = t.welcome;
+            document.getElementById('submit-text').innerText = t.submit;
+            document.getElementById('like-btn-text').innerText = hasLiked ? t.liked : t.like;
+            document.getElementById('stats-label').innerText = t.stats;
+            document.getElementById('ai-btn').innerHTML = `<span>✨</span> ${t.aiBtn}`;
+            
+            if (hasLiked) { 
+                btn.classList.add('liked-active');
+                const h = document.getElementById('heart-icon'); 
+                h.style.fill = 'var(--heart-red)'; h.style.stroke = 'var(--heart-red)'; 
+            }
         }
 
         document.getElementById('guest-form').onsubmit = async (e) => {
@@ -333,53 +487,17 @@
                 });
                 showModal('success', i18n[currentLang].success, i18n[currentLang].successMsg);
                 document.getElementById('guest-form').reset();
-            } catch (err) { 
-                showModal('error', '系統繁忙', '請稍後再試。'); 
-            } finally { 
-                btn.disabled = false; 
-            }
+            } catch (err) { showModal('error', '系統繁忙', '請稍後再試。'); } finally { btn.disabled = false; }
         };
-
-        async function doLike() {
-            if (hasLiked || !user) return;
-            hasLiked = true;
-            localStorage.setItem('liked_' + appId, 'true');
-            updateUI();
-            try {
-                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'stats', 'counter'), { 
-                    likes: increment(1), lastUpdated: serverTimestamp() 
-                }, { merge: true });
-            } catch (err) { hasLiked = false; updateUI(); }
-        }
-
-        function updateUI() {
-            const t = i18n[currentLang];
-            document.getElementById('header-sub').innerText = t.hSub;
-            document.getElementById('header-main').innerText = t.hMain;
-            document.getElementById('welcome-msg').innerText = t.welcome;
-            document.getElementById('submit-text').innerText = t.submit;
-            document.getElementById('like-btn-text').innerText = hasLiked ? t.liked : t.like;
-            document.getElementById('stats-label').innerText = t.stats;
-            document.getElementById('ai-btn').innerHTML = `<span>✨</span> ${t.aiBtn}`;
-            if (hasLiked) { 
-                const h = document.getElementById('heart-icon'); 
-                h.style.fill = '#FF4D4D'; h.style.stroke = '#FF4D4D'; 
-            }
-        }
 
         function renderWall(list) {
             const wall = document.getElementById('marquee-wall'), none = document.getElementById('no-blessings'), stats = document.getElementById('stats-container');
             if (!list.length) { wall.classList.add('hidden'); none.classList.remove('hidden'); return; }
             wall.classList.remove('hidden'); none.classList.add('hidden'); stats.classList.remove('hidden');
-            
             const r1 = document.getElementById('m-row-1'), r2 = document.getElementById('m-row-2');
-            const cardHtml = (i) => `<div class="blessing-card"><div class="text-xl text-white font-bold mb-2">${i.blessing}</div><div class="text-sm text-[#E5C07B] opacity-80">${i.name} · ${i.organization}</div></div>`;
-            
+            const cardHtml = (i) => `<div class="blessing-card group"><div class="absolute top-2 right-4 opacity-10 group-hover:opacity-30 transition-opacity"><svg class="w-12 h-12 fill-[#E5C07B]" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></div><div class="text-xl text-white font-bold mb-2 relative z-10">${i.blessing}</div><div class="flex items-center gap-2 relative z-10"><svg class="w-3 h-3 fill-[#E5C07B]" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg><div class="text-sm text-[#E5C07B] opacity-90 font-medium">${i.name} · ${i.organization}</div></div></div>`;
             r1.innerHTML = r2.innerHTML = '';
-            list.forEach((item, idx) => {
-                if (idx % 2 === 0) r1.innerHTML += cardHtml(item);
-                else r2.innerHTML += cardHtml(item);
-            });
+            list.forEach((item, idx) => { if (idx % 2 === 0) r1.innerHTML += cardHtml(item); else r2.innerHTML += cardHtml(item); });
             r1.innerHTML += r1.innerHTML; r2.innerHTML += r2.innerHTML;
         }
 
@@ -392,18 +510,8 @@
         }
 
         document.getElementById('close-modal-btn').onclick = () => document.getElementById('status-modal').classList.add('opacity-0', 'pointer-events-none');
-        document.getElementById('show-input-btn').onclick = () => {
-            document.getElementById('input-section').classList.remove('hidden');
-            document.getElementById('display-section').classList.add('hidden');
-            document.getElementById('show-input-btn').classList.add('active');
-            document.getElementById('show-display-btn').classList.remove('active');
-        };
-        document.getElementById('show-display-btn').onclick = () => {
-            document.getElementById('input-section').classList.add('hidden');
-            document.getElementById('display-section').classList.remove('hidden');
-            document.getElementById('show-display-btn').classList.add('active');
-            document.getElementById('show-input-btn').classList.remove('active');
-        };
+        document.getElementById('show-input-btn').onclick = () => { document.getElementById('input-section').classList.remove('hidden'); document.getElementById('display-section').classList.add('hidden'); document.getElementById('show-input-btn').classList.add('active'); document.getElementById('show-display-btn').classList.remove('active'); };
+        document.getElementById('show-display-btn').onclick = () => { document.getElementById('input-section').classList.add('hidden'); document.getElementById('display-section').classList.remove('hidden'); document.getElementById('show-display-btn').classList.add('active'); document.getElementById('show-input-btn').classList.remove('active'); };
         document.getElementById('event-like-btn').onclick = doLike;
         document.getElementById('lang-zh-btn').onclick = () => { currentLang='zh'; updateUI(); document.getElementById('lang-zh-btn').classList.add('active'); document.getElementById('lang-en-btn').classList.remove('active'); };
         document.getElementById('lang-en-btn').onclick = () => { currentLang='en'; updateUI(); document.getElementById('lang-en-btn').classList.add('active'); document.getElementById('lang-zh-btn').classList.remove('active'); };
