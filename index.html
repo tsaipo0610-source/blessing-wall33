@@ -27,6 +27,8 @@
             justify-content: center;
             min-height: 100vh;
             overflow-x: hidden;
+            /* 防止整個頁面被手勢縮放 */
+            touch-action: pan-x pan-y;
         }
 
         .projection-canvas {
@@ -35,9 +37,13 @@
             position: relative;
             display: flex;
             flex-direction: column;
-            padding: 40px 5%;
+            padding: 20px 5%; /* 手機端縮減邊距 */
             box-sizing: border-box;
             z-index: 10;
+        }
+
+        @media (min-width: 768px) {
+            .projection-canvas { padding: 40px 5%; }
         }
 
         .glass-panel {
@@ -52,6 +58,12 @@
 
         .submit-btn { background: linear-gradient(135deg, #E5C07B 0%, #B8860B 100%); color: #0A0F1E; font-weight: 700; letter-spacing: 0.2em; cursor: pointer; }
         
+        /* 核心優化：防止連點縮放 */
+        #event-like-btn {
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+
         @keyframes heart-beat {
             0%, 100% { transform: scale(1); }
             50% { transform: scale(1.1); }
@@ -90,6 +102,7 @@
             background: rgba(255, 255, 255, 0.08) !important; 
             border: 1px solid rgba(255, 255, 255, 0.2) !important; 
             color: white !important;
+            font-size: 16px !important; /* 防止 iOS 輸入時縮放 */
         }
         
         .particle { position: absolute; background: radial-gradient(circle, #E5C07B 0%, transparent 70%); border-radius: 50%; pointer-events: none; opacity: 0.1; animation: float linear infinite; }
@@ -106,7 +119,7 @@
 
     <div class="projection-canvas">
         <!-- System Status & Navigation -->
-        <div class="flex flex-col md:flex-row items-center justify-between gap-4 mb-8 z-50">
+        <div class="flex flex-col md:flex-row items-center justify-between gap-4 mb-6 z-50">
             <div class="flex items-center gap-3 bg-black/20 px-4 py-2 rounded-full border border-white/5">
                 <div id="db-status-dot" class="w-2.5 h-2.5 rounded-full bg-red-500"></div>
                 <span class="text-[10px] text-white/40 uppercase tracking-widest">Live Sync Enabled</span>
@@ -125,33 +138,33 @@
         </div>
 
         <div class="flex flex-col h-full">
-            <header class="mb-10 text-center lg:text-left">
-                <div id="header-sub" class="text-lg lg:text-3xl font-light tracking-[0.5em] text-[#E5C07B] uppercase mb-3">校長會議</div>
-                <h1 id="header-main" class="text-3xl lg:text-6xl font-bold tracking-tight text-white border-t-2 border-white/10 pt-4">凝聚卓越 · 引領創新</h1>
+            <header class="mb-8 text-center lg:text-left">
+                <div id="header-sub" class="text-lg lg:text-3xl font-light tracking-[0.5em] text-[#E5C07B] uppercase mb-2">校長會議</div>
+                <h1 id="header-main" class="text-2xl lg:text-6xl font-bold tracking-tight text-white border-t-2 border-white/10 pt-4">凝聚卓越 · 引領創新</h1>
             </header>
 
             <main class="flex-grow flex items-center justify-center">
                 <!-- Mobile Sign-in Section -->
-                <section id="input-section" class="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-5 gap-8">
+                <section id="input-section" class="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-5 gap-6 lg:gap-8">
                     <div class="lg:col-span-2 flex flex-col justify-center">
-                        <div class="glass-panel p-8 rounded-3xl border-l-8 border-[#E5C07B]">
+                        <div class="glass-panel p-6 lg:p-8 rounded-3xl border-l-8 border-[#E5C07B]">
                             <h2 class="text-2xl font-light mb-4 text-white uppercase tracking-wider">Join Us</h2>
-                            <p id="welcome-msg" class="text-gray-400 font-light leading-relaxed mb-8">您的到訪與祝福是我們前進的動力。請完成簽到並為大會集氣點讚！</p>
+                            <p id="welcome-msg" class="text-sm lg:text-base text-gray-400 font-light leading-relaxed mb-6">您的到訪與祝福是我們前進的動力。請完成簽到並為大會集氣點讚！</p>
                             
-                            <button type="button" id="event-like-btn" class="relative overflow-hidden w-full bg-white/10 border border-[#E5C07B]/40 rounded-full py-5 flex flex-col items-center justify-center gap-1 transition-all active:scale-90 group shadow-lg hover:shadow-[#E5C07B]/20">
+                            <button type="button" id="event-like-btn" class="relative overflow-hidden w-full bg-white/10 border border-[#E5C07B]/40 rounded-full py-5 flex flex-col items-center justify-center gap-1 transition-all active:scale-95 group shadow-lg">
                                 <div class="flex items-center gap-3">
                                     <svg class="w-8 h-8 fill-[#FF4D4D] group-hover:scale-125 transition-transform duration-300 heart-pulse" viewBox="0 0 24 24">
                                         <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
                                     </svg>
                                     <span id="like-btn-text" class="text-lg font-bold text-white tracking-widest uppercase">為大會點讚</span>
                                 </div>
-                                <span class="text-[9px] text-white/40 uppercase tracking-widest">( 點擊即可增加能量 )</span>
+                                <span class="text-[9px] text-white/40 uppercase tracking-widest">( 快速連點集氣 )</span>
                             </button>
                         </div>
                     </div>
 
                     <div class="lg:col-span-3">
-                        <div class="glass-panel p-8 rounded-3xl">
+                        <div class="glass-panel p-6 lg:p-8 rounded-3xl">
                             <form id="guest-form" class="space-y-4">
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <input type="text" id="name" name="name" placeholder="您的姓名" required class="w-full rounded-xl px-4 py-4 text-white">
@@ -180,13 +193,11 @@
 
                 <!-- Big Screen Display Section -->
                 <section id="display-section" class="hidden w-full h-full flex flex-col items-center justify-center">
-                    <!-- 跑馬燈 -->
                     <div id="marquee-wall" class="w-screen flex flex-col justify-center space-y-12 overflow-hidden py-10">
                         <div class="marquee-container w-full overflow-hidden"><div id="m-row-1" class="marquee-content"></div></div>
                         <div class="marquee-container w-full overflow-hidden"><div id="m-row-2" class="marquee-content"></div></div>
                     </div>
 
-                    <!-- 即時統計統計 -->
                     <div id="stats-container" class="mt-8 transition-all duration-1000 transform opacity-0 translate-y-10">
                         <div class="bg-black/40 border border-[#E5C07B]/40 rounded-[40px] px-16 py-10 backdrop-blur-3xl shadow-2xl flex flex-col items-center">
                             <span id="stats-label" class="text-xs font-bold uppercase tracking-[0.6em] text-[#E5C07B] mb-6">大會互動集氣能量</span>
@@ -255,12 +266,10 @@
 
         function setupSync() {
             if (!user) return;
-            // 監聽留言牆
             onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'registrations'), (snap) => {
                 const data = snap.docs.map(d => d.data()).sort((a,b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
                 renderWall(data);
             });
-            // 監聽點讚數 (Real-time)
             onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'stats', 'counter'), (snap) => {
                 if (snap.exists()) {
                     const count = snap.data().likes || 0;
@@ -279,18 +288,20 @@
             visual.classList.add('bump');
             setTimeout(() => visual.classList.remove('bump'), 400);
             
-            // 顯示容器
             const container = document.getElementById('stats-container');
             container.classList.remove('opacity-0', 'translate-y-10');
         }
 
+        // 優化後的點讚處理，防止手勢縮放
         async function handleLike(e) {
+            if (e) {
+                // 防止多觸點手勢
+                if (e.cancelable) e.preventDefault();
+            }
             if (!user) return;
             
-            // 每次點擊都噴愛心
             spawnHearts(e);
 
-            // 更新雲端點讚 (使用 increment 確保原子性)
             try {
                 await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'stats', 'counter'), {
                     likes: increment(1),
@@ -302,20 +313,31 @@
         function spawnHearts(e) {
             const btn = document.getElementById('event-like-btn');
             const rect = btn.getBoundingClientRect();
-            const startX = rect.left + rect.width / 2;
-            const startY = rect.top + rect.height / 2;
+            
+            // 處理觸控點座標或按鈕中心座標
+            let clientX, clientY;
+            if (e && e.touches && e.touches[0]) {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            } else if (e && e.clientX) {
+                clientX = e.clientX;
+                clientY = e.clientY;
+            } else {
+                clientX = rect.left + rect.width / 2;
+                clientY = rect.top + rect.height / 2;
+            }
 
-            for (let i = 0; i < 8; i++) {
+            for (let i = 0; i < 6; i++) {
                 const h = document.createElement('div');
                 h.className = 'heart-particle';
                 h.innerHTML = ['❤️', '✨', '💖', '🔥'][Math.floor(Math.random()*4)];
-                h.style.left = startX + 'px';
-                h.style.top = startY + 'px';
-                const angle = Math.random() * Math.PI * 2;
-                const dist = 150 + Math.random() * 200;
+                h.style.left = clientX + 'px';
+                h.style.top = clientY + 'px';
+                const angle = (Math.random() * Math.PI) + Math.PI; // 向上噴發
+                const dist = 100 + Math.random() * 150;
                 h.style.setProperty('--tx', `${Math.cos(angle) * dist}px`);
-                h.style.setProperty('--ty', `${Math.sin(angle) * dist - 100}px`);
-                h.style.setProperty('--tr', `${Math.random() * 720}deg`);
+                h.style.setProperty('--ty', `${Math.sin(angle) * dist}px`);
+                h.style.setProperty('--tr', `${Math.random() * 360}deg`);
                 document.body.appendChild(h);
                 setTimeout(() => h.remove(), 1000);
             }
@@ -329,7 +351,7 @@
 
             const card = (i) => `
                 <div class="blessing-card group">
-                    <div class="text-2xl text-white font-bold mb-3 tracking-wide">"${i.blessing}"</div>
+                    <div class="text-xl lg:text-2xl text-white font-bold mb-3 tracking-wide">"${i.blessing}"</div>
                     <div class="flex items-center gap-2">
                         <div class="w-1.5 h-1.5 rounded-full bg-[#E5C07B]"></div>
                         <div class="text-sm text-[#E5C07B] font-medium tracking-widest">${i.name} · ${i.organization} <span class="opacity-60 text-[10px] ml-2">${i.title}</span></div>
@@ -338,7 +360,6 @@
             
             r1.innerHTML = r2.innerHTML = '';
             list.forEach((item, idx) => { if (idx % 2 === 0) r1.innerHTML += card(item); else r2.innerHTML += card(item); });
-            // 無縫拼接
             if (list.length > 3) { r1.innerHTML += r1.innerHTML; r2.innerHTML += r2.innerHTML; }
         }
 
@@ -388,7 +409,11 @@
         document.getElementById('close-modal-btn').onclick = () => document.getElementById('status-modal').classList.add('opacity-0', 'pointer-events-none');
         document.getElementById('show-input-btn').onclick = () => { document.getElementById('input-section').classList.remove('hidden'); document.getElementById('display-section').classList.add('hidden'); document.getElementById('show-input-btn').classList.add('active'); document.getElementById('show-display-btn').classList.remove('active'); };
         document.getElementById('show-display-btn').onclick = () => { document.getElementById('input-section').classList.add('hidden'); document.getElementById('display-section').classList.remove('hidden'); document.getElementById('show-display-btn').classList.add('active'); document.getElementById('show-input-btn').classList.remove('active'); };
-        document.getElementById('event-like-btn').onclick = handleLike;
+        
+        // 使用 pointerdown 以獲得更快的反應速度
+        const likeBtn = document.getElementById('event-like-btn');
+        likeBtn.addEventListener('pointerdown', handleLike);
+
         document.getElementById('lang-zh-btn').onclick = () => { currentLang='zh'; updateUI(); document.getElementById('lang-zh-btn').classList.add('active'); document.getElementById('lang-en-btn').classList.remove('active'); };
         document.getElementById('lang-en-btn').onclick = () => { currentLang='en'; updateUI(); document.getElementById('lang-en-btn').classList.add('active'); document.getElementById('lang-zh-btn').classList.remove('active'); };
 
