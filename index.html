@@ -135,7 +135,6 @@
     <div id="particle-container" class="absolute inset-0 z-0"></div>
 
     <div class="projection-canvas">
-        <!-- 導覽控制區 -->
         <div class="absolute top-6 right-10 z-50 flex gap-4 scale-90 origin-right">
             <div id="db-status-dot" class="w-3 h-3 rounded-full bg-red-500 mt-3 animate-pulse" title="資料庫狀態"></div>
             <div class="flex space-x-1 p-1 bg-white/5 backdrop-blur-md rounded-lg border border-white/10">
@@ -155,7 +154,6 @@
             </header>
 
             <main class="flex-grow relative z-10 flex items-center justify-center overflow-hidden">
-                <!-- 簽到表單 -->
                 <section id="input-section" class="w-full grid grid-cols-1 lg:grid-cols-5 gap-10">
                     <div class="lg:col-span-2 flex flex-col justify-center space-y-6">
                         <div class="glass-panel p-8 rounded-3xl border-l-8 border-l-[#E5C07B] flex flex-col justify-between h-full">
@@ -176,10 +174,10 @@
                         <div class="glass-panel p-8 rounded-3xl">
                             <form id="guest-form" class="space-y-5">
                                 <div class="grid grid-cols-2 gap-5">
-                                    <input type="text" id="name" placeholder="姓名 / Name" required class="w-full rounded-xl px-4 py-3 text-white text-base">
-                                    <input type="text" id="organization" placeholder="服務單位 / Organization" required class="w-full rounded-xl px-4 py-3 text-white text-base">
+                                    <input type="text" id="name" name="name" placeholder="姓名 / Name" required class="w-full rounded-xl px-4 py-3 text-white text-base">
+                                    <input type="text" id="organization" name="organization" placeholder="服務單位 / Organization" required class="w-full rounded-xl px-4 py-3 text-white text-base">
                                 </div>
-                                <input type="text" id="title-field" placeholder="職稱 / Title" required class="w-full rounded-xl px-4 py-3 text-white text-base">
+                                <input type="text" id="title-field" name="title" placeholder="職稱 / Title" required class="w-full rounded-xl px-4 py-3 text-white text-base">
                                 <div class="relative">
                                     <div class="flex justify-between items-center mb-2 px-1">
                                         <label class="text-[10px] text-gray-400 font-semibold uppercase tracking-widest">祝福辭 / Blessing</label>
@@ -190,7 +188,7 @@
                                             <span id="ai-btn-text">AI 智繪祝福</span>
                                         </button>
                                     </div>
-                                    <textarea id="blessing" rows="2" maxlength="100" required class="w-full rounded-xl px-4 py-3 text-white resize-none text-base" placeholder="期待您的暖心留言..."></textarea>
+                                    <textarea id="blessing" name="blessing" rows="2" maxlength="100" required class="w-full rounded-xl px-4 py-3 text-white resize-none text-base" placeholder="期待您的暖心留言..."></textarea>
                                     <div id="ai-loader" class="absolute inset-0 bg-black/60 backdrop-blur-sm rounded-xl flex items-center justify-center hidden">
                                         <div class="w-6 h-6 border-4 border-white/20 border-t-[#E5C07B] animate-spin rounded-full"></div>
                                     </div>
@@ -203,7 +201,6 @@
                     </div>
                 </section>
 
-                <!-- 祝福牆展示 -->
                 <section id="display-section" class="hidden w-full h-full flex flex-col items-center justify-between py-4">
                     <div id="no-blessings" class="flex-grow flex items-center justify-center opacity-30">
                         <p class="text-4xl font-light tracking-widest italic">凝聚智慧，共創卓越</p>
@@ -233,7 +230,6 @@
         </div>
     </div>
 
-    <!-- 訊息提示視窗 -->
     <div id="status-modal" class="fixed inset-0 bg-black/90 backdrop-blur-xl flex items-center justify-center opacity-0 pointer-events-none transition-all z-[100]">
         <div class="glass-panel p-10 rounded-[40px] max-w-lg w-full text-center">
             <div id="modal-icon" class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 bg-white/5 border border-white/10"></div>
@@ -258,23 +254,12 @@
           measurementId: "G-5CQB83LMY5"
         };
 
-        const googleSheetUrl = ""; 
+        // 更新後的 Google Sheets Web App URL
+        const googleSheetUrl = "https://script.google.com/macros/s/AKfycbxnKq7PMPrc-FCLvkPiQlpJqLg2V2xUwi0SxKBFNTKqZ5l5ypeL1PWhpPahz2FmyJzF/exec"; 
         const appId = 'principal-conference-v1';
         let db, auth, user;
         let currentLang = 'zh';
         let hasLiked = localStorage.getItem('liked_' + appId) === 'true';
-
-        // 預設備份祝福語
-        const fallbackBlessings = [
-            "凝聚智慧，共創教育新巔峰 🌟",
-            "願教育之光照亮每位學子的未來 ✨",
-            "攜手同心，為孩子搭建夢想藍圖 🏗️",
-            "智慧引領，點燃校園創新熱情 🔥",
-            "以愛為名，深耕教育最美風景 🌳",
-            "追求卓越，譜寫教育華麗樂章 🎵",
-            "啟發潛能，成就不凡教育使命 🎯",
-            "春風化雨，傳遞溫暖正能量 🌈"
-        ];
 
         const i18n = {
             zh: {
@@ -282,16 +267,14 @@
                 welcome: "歡迎各位教育領袖蒞臨。您的每一份祝福都是支持我們前行的正能量。",
                 aiBtn: "AI 智繪祝福", submit: "提交簽到訊息",
                 success: "提交成功", successMsg: "您的資料已同步。",
-                like: "請為活動點讚", liked: "感謝支持", stats: "累計教育正能量",
-                aiPrompt: "扮演校長會議參與者。請生成一句簡短祝福語（限15字內，繁中）。規則：1.嚴禁包含姓名、職稱、單位。2.嚴禁使用引號、星號、括號等任何標點。3.僅允許在句尾附上一個 Emoji。範例：願教育之光照亮未來 💡"
+                like: "請為活動點讚", liked: "感謝支持", stats: "累計教育正能量"
             },
             en: {
                 hSub: "PRINCIPAL CONFERENCE", hMain: "GUEST WELCOME",
                 welcome: "Welcome leaders. Your blessing provides positive energy.",
                 aiBtn: "AI Magic", submit: "Submit Entry",
                 success: "Success", successMsg: "Data synchronized.",
-                like: "LIKE THE EVENT", liked: "SUPPORTED", stats: "ENERGY STATS",
-                aiPrompt: "School leader. Concise blessing (<10 words). Rules: 1. NO names/titles/orgs. 2. NO symbols like *, quotes, brackets. 3. ONLY one emoji at the end."
+                like: "LIKE THE EVENT", liked: "SUPPORTED", stats: "ENERGY STATS"
             }
         };
 
@@ -318,71 +301,11 @@
             onSnapshot(regCol, (snap) => {
                 const data = snap.docs.map(d => d.data()).sort((a,b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
                 renderWall(data);
-            }, (err) => console.error(err));
-
+            });
             const statsDoc = doc(db, 'artifacts', appId, 'public', 'data', 'stats', 'counter');
             onSnapshot(statsDoc, (snap) => {
-                if (snap.exists()) {
-                    const val = snap.data().likes || 0;
-                    document.getElementById('total-likes').innerText = val;
-                }
-            }, (err) => console.error(err));
-        }
-
-        async function doAI() {
-            const loader = document.getElementById('ai-loader');
-            const blessingInput = document.getElementById('blessing');
-            loader.classList.remove('hidden');
-            
-            const promptText = i18n[currentLang].aiPrompt;
-            // 更新後的專屬 API Key
-            const apiKey = "AIzaSyBzOTEWz81BVWOSSW2hIbSCMhkhFXo_UgE"; 
-
-            const useFallback = () => {
-                const randomIdx = Math.floor(Math.random() * fallbackBlessings.length);
-                blessingInput.value = fallbackBlessings[randomIdx];
-                loader.classList.add('hidden');
-            };
-
-            const callGemini = async (retries = 3, delay = 1000) => {
-                try {
-                    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ 
-                            contents: [{ parts: [{ text: promptText }] }],
-                            generationConfig: {
-                                temperature: 0.9,
-                                maxOutputTokens: 50
-                            }
-                        })
-                    });
-                    
-                    if (!res.ok) throw new Error(`API Error ${res.status}`);
-                    
-                    const data = await res.json();
-                    let text = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
-                    // 清理不必要的符號
-                    text = text.replace(/[*"'「」'『』()（）\[\]{}\-_#!?.,，。：；]/g, "").trim();
-                    
-                    if (text && text.length > 2) {
-                        blessingInput.value = text;
-                    } else {
-                        throw new Error("Invalid Output");
-                    }
-                } catch (err) {
-                    if (retries > 0) {
-                        setTimeout(() => callGemini(retries - 1, delay * 2), delay);
-                    } else {
-                        console.error("AI Generation failed:", err);
-                        useFallback();
-                    }
-                } finally {
-                    loader.classList.add('hidden');
-                }
-            };
-
-            callGemini();
+                if (snap.exists()) document.getElementById('total-likes').innerText = snap.data().likes || 0;
+            });
         }
 
         document.getElementById('guest-form').onsubmit = async (e) => {
@@ -390,31 +313,69 @@
             if (!user) return;
             const btn = document.getElementById('submit-btn');
             btn.disabled = true;
-            const payload = {
+
+            const formData = {
                 name: document.getElementById('name').value,
                 organization: document.getElementById('organization').value,
                 title: document.getElementById('title-field').value,
-                blessing: document.getElementById('blessing').value
+                blessing: document.getElementById('blessing').value,
+                time: new Date().toLocaleString()
             };
 
             try {
+                // 1. 同步到 Firebase (供即時投影)
                 const regCol = collection(db, 'artifacts', appId, 'public', 'data', 'registrations');
-                await addDoc(regCol, { ...payload, timestamp: serverTimestamp() });
+                const firebasePromise = addDoc(regCol, { ...formData, timestamp: serverTimestamp() });
+
+                // 2. 同步到 Google Sheets (後台存檔)
+                let sheetPromise = Promise.resolve();
+                if (googleSheetUrl) {
+                    // 使用 fetch 發送資料，處理 Google Apps Script 的 CORS 行為
+                    sheetPromise = fetch(googleSheetUrl, {
+                        method: 'POST',
+                        mode: 'no-cors', 
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(formData)
+                    }).catch(err => console.warn("Sheet sync warning:", err));
+                }
+
+                // 併行處理，Firebase 優先，Sheet 失敗不應阻斷 UI 成功顯示
+                await firebasePromise;
+                // 異步啟動 Sheet 同步
+                sheetPromise.then(() => console.log("Google Sheets Sync Done."));
+
                 showModal('success', i18n[currentLang].success, i18n[currentLang].successMsg);
                 document.getElementById('guest-form').reset();
             } catch (err) { 
-                showModal('error', '提交失敗', '請確認網路連線');
+                console.error("Submission error:", err);
+                showModal('error', '提交失敗', '請確認網路連線或系統設定');
             } finally { 
                 btn.disabled = false; 
             }
         };
 
+        // --- 以下為 UI 互動邏輯 ---
+        async function doAI() {
+            const loader = document.getElementById('ai-loader');
+            const input = document.getElementById('blessing');
+            loader.classList.remove('hidden');
+            const apiKey = "AIzaSyBzOTEWz81BVWOSSW2hIbSCMhkhFXo_UgE"; 
+            try {
+                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: "扮演參與校長會議的貴賓。請生成一句簡短祝福語（限15字內，繁中，不含標點，可加一個Emoji）。" }] }] })
+                });
+                const data = await res.json();
+                input.value = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "";
+            } catch (err) { console.error(err); }
+            finally { loader.classList.add('hidden'); }
+        }
+
         async function doLike(e) {
             if (hasLiked || !user) return;
-            hasLiked = true; 
-            localStorage.setItem('liked_' + appId, 'true'); 
-            updateUI();
-            createLikeAnimation(e);
+            hasLiked = true; localStorage.setItem('liked_' + appId, 'true'); 
+            updateUI(); createLikeAnimation(e);
             const statsDoc = doc(db, 'artifacts', appId, 'public', 'data', 'stats', 'counter');
             try { await updateDoc(statsDoc, { likes: increment(1) }); } 
             catch { await setDoc(statsDoc, { likes: 1 }, { merge: true }); }
@@ -422,19 +383,13 @@
 
         function createLikeAnimation(e) {
             for(let i=0; i<8; i++) {
-                const burst = document.createElement('div');
-                burst.className = 'like-burst';
-                burst.style.left = `${e.clientX}px`;
-                burst.style.top = `${e.clientY}px`;
-                const heart = document.createElement('div');
-                heart.innerHTML = `<svg class="w-6 h-6 fill-red-500" viewBox="0 0 24 24"><path d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" /></svg>`;
-                heart.className = 'burst-anim';
-                const angle = (Math.random() * 360); 
-                const dist = Math.random() * 80 + 40;
-                heart.style.transform = `rotate(${angle}deg) translate(${dist}px)`;
-                burst.appendChild(heart);
-                document.body.appendChild(burst);
-                setTimeout(() => burst.remove(), 800);
+                const b = document.createElement('div'); b.className = 'like-burst';
+                b.style.left = `${e.clientX}px`; b.style.top = `${e.clientY}px`;
+                const h = document.createElement('div'); h.className = 'burst-anim';
+                h.innerHTML = `<svg class="w-6 h-6 fill-red-500" viewBox="0 0 24 24"><path d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" /></svg>`;
+                const a = Math.random()*360; const d = Math.random()*80+40;
+                h.style.transform = `rotate(${a}deg) translate(${d}px)`; b.appendChild(h);
+                document.body.appendChild(b); setTimeout(() => b.remove(), 800);
             }
         }
 
@@ -447,11 +402,7 @@
             document.getElementById('submit-text').innerText = t.submit;
             document.getElementById('like-btn-text').innerText = hasLiked ? t.liked : t.like;
             document.getElementById('stats-label').innerText = t.stats;
-            const heart = document.getElementById('heart-icon');
-            if (hasLiked) {
-                heart.style.fill = '#FF4D4D';
-                heart.style.stroke = '#FF4D4D';
-            }
+            if (hasLiked) { const h = document.getElementById('heart-icon'); h.style.fill = '#FF4D4D'; h.style.stroke = '#FF4D4D'; }
         }
 
         function renderWall(list) {
@@ -461,72 +412,47 @@
             if (!list.length) return;
             wall.classList.remove('hidden'); none.classList.add('hidden'); stats.classList.remove('hidden');
             const r1 = document.getElementById('m-row-1'), r2 = document.getElementById('m-row-2');
-            const generateCard = (item) => `
+            const card = (i) => `
                 <div class="blessing-card">
-                    <div class="text-[1.6vw] text-white font-semibold mb-4 leading-[1.4] tracking-wider">
-                        ${item.blessing}
-                    </div>
+                    <div class="text-[1.6vw] text-white font-semibold mb-4 leading-[1.4] tracking-wider">${i.blessing}</div>
                     <div class="flex flex-col border-t border-white/20 pt-3">
                         <div class="text-[1.8vw] text-[#E5C07B] font-bold tracking-[0.1em] mb-0.5 flex items-baseline">
-                            ${item.name} 
-                            <span class="text-[1vw] text-white/40 font-medium ml-2 tracking-normal italic">${item.title || ''}</span>
+                            ${i.name} <span class="text-[1vw] text-white/40 font-medium ml-2 italic">${i.title || ''}</span>
                         </div>
-                        <div class="text-[1.3vw] text-white/60 font-semibold uppercase tracking-[0.05em]">
-                            ${item.organization}
-                        </div>
+                        <div class="text-[1.3vw] text-white/60 font-semibold uppercase tracking-[0.05em]">${i.organization}</div>
                     </div>
                 </div>
             `;
             r1.innerHTML = r2.innerHTML = '';
-            list.forEach((item, i) => {
-                const card = generateCard(item);
-                if (i % 2 === 0) r1.innerHTML += card; else r2.innerHTML += card;
-            });
-            if (list.length > 0) {
-                r1.innerHTML += r1.innerHTML;
-                r2.innerHTML += r2.innerHTML;
-            }
+            list.forEach((item, i) => { if (i % 2 === 0) r1.innerHTML += card(item); else r2.innerHTML += card(item); });
+            r1.innerHTML += r1.innerHTML; r2.innerHTML += r2.innerHTML;
         }
 
         function showModal(type, title, msg) {
-            const modal = document.getElementById('status-modal');
+            const m = document.getElementById('status-modal');
             document.getElementById('modal-title').innerText = title;
             document.getElementById('modal-msg').innerText = msg;
-            const icon = document.getElementById('modal-icon');
-            icon.innerHTML = type === 'success' ? '✅' : '❌';
-            icon.className = "text-4xl mb-4";
-            modal.classList.remove('opacity-0', 'pointer-events-none');
+            const i = document.getElementById('modal-icon');
+            i.innerHTML = type === 'success' ? '✅' : '❌'; i.className = "text-4xl mb-4";
+            m.classList.remove('opacity-0', 'pointer-events-none');
         }
 
         window.closeModal = () => document.getElementById('status-modal').classList.add('opacity-0', 'pointer-events-none');
-        document.getElementById('show-input-btn').onclick = () => { 
-            document.getElementById('input-section').classList.remove('hidden'); 
-            document.getElementById('display-section').classList.add('hidden'); 
-            document.getElementById('show-input-btn').classList.add('active'); 
-            document.getElementById('show-display-btn').classList.remove('active'); 
-        };
-        document.getElementById('show-display-btn').onclick = () => { 
-            document.getElementById('input-section').classList.add('hidden'); 
-            document.getElementById('display-section').classList.remove('hidden'); 
-            document.getElementById('show-display-btn').classList.add('active'); 
-            document.getElementById('show-input-btn').classList.remove('active'); 
-        };
+        document.getElementById('show-input-btn').onclick = () => { document.getElementById('input-section').classList.remove('hidden'); document.getElementById('display-section').classList.add('hidden'); document.getElementById('show-input-btn').classList.add('active'); document.getElementById('show-display-btn').classList.remove('active'); };
+        document.getElementById('show-display-btn').onclick = () => { document.getElementById('input-section').classList.add('hidden'); document.getElementById('display-section').classList.remove('hidden'); document.getElementById('show-display-btn').classList.add('active'); document.getElementById('show-input-btn').classList.remove('active'); };
         document.getElementById('ai-btn').onclick = doAI;
         document.getElementById('event-like-btn').onclick = doLike;
         document.getElementById('lang-zh-btn').onclick = () => { currentLang='zh'; updateUI(); document.getElementById('lang-zh-btn').classList.add('active'); document.getElementById('lang-en-btn').classList.remove('active'); };
         document.getElementById('lang-en-btn').onclick = () => { currentLang='en'; updateUI(); document.getElementById('lang-en-btn').classList.add('active'); document.getElementById('lang-zh-btn').classList.remove('active'); };
-
         function createParticles() {
-            const container = document.getElementById('particle-container');
+            const c = document.getElementById('particle-container');
             for (let i = 0; i < 20; i++) {
-                const p = document.createElement('div');
-                p.className = 'particle';
+                const p = document.createElement('div'); p.className = 'particle';
                 const s = Math.random() * 4 + 2;
                 p.style.cssText = `width:${s}px; height:${s}px; left:${Math.random()*100}%; top:${Math.random()*100}%; animation-duration:${Math.random()*10+15}s;`;
-                container.appendChild(p);
+                c.appendChild(p);
             }
         }
-
         init();
     </script>
 </body>
