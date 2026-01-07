@@ -258,13 +258,23 @@
           measurementId: "G-5CQB83LMY5"
         };
 
-        // GAS 試算表連結（測試時可保留空白）
         const googleSheetUrl = ""; 
-
         const appId = 'principal-conference-v1';
         let db, auth, user;
         let currentLang = 'zh';
         let hasLiked = localStorage.getItem('liked_' + appId) === 'true';
+
+        // 預設備份祝福語
+        const fallbackBlessings = [
+            "凝聚智慧，共創教育新巔峰 🌟",
+            "願教育之光照亮每位學子的未來 ✨",
+            "攜手同心，為孩子搭建夢想藍圖 🏗️",
+            "智慧引領，點燃校園創新熱情 🔥",
+            "以愛為名，深耕教育最美風景 🌳",
+            "追求卓越，譜寫教育華麗樂章 🎵",
+            "啟發潛能，成就不凡教育使命 🎯",
+            "春風化雨，傳遞溫暖正能量 🌈"
+        ];
 
         const i18n = {
             zh: {
@@ -273,7 +283,7 @@
                 aiBtn: "AI 智繪祝福", submit: "提交簽到訊息",
                 success: "提交成功", successMsg: "您的資料已同步。",
                 like: "請為活動點讚", liked: "感謝支持", stats: "累計教育正能量",
-                aiPrompt: "扮演校長會議參與者。請生成一句簡短祝福語（限15字內，繁中）。規則：1.嚴禁包含姓名、職稱、單位。2.嚴禁使用引號、星號、括號等任何非文字標點符號。3.僅允許在句尾附上一個 Emoji。範例：願教育之光照亮未來 💡"
+                aiPrompt: "扮演校長會議參與者。請生成一句簡短祝福語（限15字內，繁中）。規則：1.嚴禁包含姓名、職稱、單位。2.嚴禁使用引號、星號、括號等任何標點。3.僅允許在句尾附上一個 Emoji。範例：願教育之光照亮未來 💡"
             },
             en: {
                 hSub: "PRINCIPAL CONFERENCE", hMain: "GUEST WELCOME",
@@ -321,33 +331,57 @@
 
         async function doAI() {
             const loader = document.getElementById('ai-loader');
+            const blessingInput = document.getElementById('blessing');
             loader.classList.remove('hidden');
-            const promptText = i18n[currentLang].aiPrompt;
             
-            const callGemini = async (retries = 5, delay = 1000) => {
+            const promptText = i18n[currentLang].aiPrompt;
+            // 更新後的專屬 API Key
+            const apiKey = "AIzaSyBzOTEWz81BVWOSSW2hIbSCMhkhFXo_UgE"; 
+
+            const useFallback = () => {
+                const randomIdx = Math.floor(Math.random() * fallbackBlessings.length);
+                blessingInput.value = fallbackBlessings[randomIdx];
+                loader.classList.add('hidden');
+            };
+
+            const callGemini = async (retries = 3, delay = 1000) => {
                 try {
-                    const apiKey = ""; // API Key will be injected by the environment
                     const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }] })
+                        body: JSON.stringify({ 
+                            contents: [{ parts: [{ text: promptText }] }],
+                            generationConfig: {
+                                temperature: 0.9,
+                                maxOutputTokens: 50
+                            }
+                        })
                     });
-                    if (!res.ok) throw new Error('API Error');
+                    
+                    if (!res.ok) throw new Error(`API Error ${res.status}`);
+                    
                     const data = await res.json();
                     let text = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
-                    // 強化清理：移除所有常見標點與符號，保留文字與 Emoji
+                    // 清理不必要的符號
                     text = text.replace(/[*"'「」'『』()（）\[\]{}\-_#!?.,，。：；]/g, "").trim();
-                    if (text) document.getElementById('blessing').value = text;
+                    
+                    if (text && text.length > 2) {
+                        blessingInput.value = text;
+                    } else {
+                        throw new Error("Invalid Output");
+                    }
                 } catch (err) {
                     if (retries > 0) {
                         setTimeout(() => callGemini(retries - 1, delay * 2), delay);
                     } else {
-                        showModal('error', 'AI 忙碌中', '請手動輸入或稍後再試。');
+                        console.error("AI Generation failed:", err);
+                        useFallback();
                     }
                 } finally {
                     loader.classList.add('hidden');
                 }
             };
+
             callGemini();
         }
 
@@ -366,9 +400,6 @@
             try {
                 const regCol = collection(db, 'artifacts', appId, 'public', 'data', 'registrations');
                 await addDoc(regCol, { ...payload, timestamp: serverTimestamp() });
-                if (googleSheetUrl) {
-                    fetch(googleSheetUrl, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
-                }
                 showModal('success', i18n[currentLang].success, i18n[currentLang].successMsg);
                 document.getElementById('guest-form').reset();
             } catch (err) { 
@@ -383,10 +414,7 @@
             hasLiked = true; 
             localStorage.setItem('liked_' + appId, 'true'); 
             updateUI();
-            
-            // 觸發愛心噴發特效
             createLikeAnimation(e);
-
             const statsDoc = doc(db, 'artifacts', appId, 'public', 'data', 'stats', 'counter');
             try { await updateDoc(statsDoc, { likes: increment(1) }); } 
             catch { await setDoc(statsDoc, { likes: 1 }, { merge: true }); }
@@ -419,7 +447,6 @@
             document.getElementById('submit-text').innerText = t.submit;
             document.getElementById('like-btn-text').innerText = hasLiked ? t.liked : t.like;
             document.getElementById('stats-label').innerText = t.stats;
-            
             const heart = document.getElementById('heart-icon');
             if (hasLiked) {
                 heart.style.fill = '#FF4D4D';
@@ -434,7 +461,6 @@
             if (!list.length) return;
             wall.classList.remove('hidden'); none.classList.add('hidden'); stats.classList.remove('hidden');
             const r1 = document.getElementById('m-row-1'), r2 = document.getElementById('m-row-2');
-            
             const generateCard = (item) => `
                 <div class="blessing-card">
                     <div class="text-[1.6vw] text-white font-semibold mb-4 leading-[1.4] tracking-wider">
@@ -451,13 +477,11 @@
                     </div>
                 </div>
             `;
-
             r1.innerHTML = r2.innerHTML = '';
             list.forEach((item, i) => {
                 const card = generateCard(item);
                 if (i % 2 === 0) r1.innerHTML += card; else r2.innerHTML += card;
             });
-            // 重複內容以實現無縫滾動
             if (list.length > 0) {
                 r1.innerHTML += r1.innerHTML;
                 r2.innerHTML += r2.innerHTML;
