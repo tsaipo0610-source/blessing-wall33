@@ -190,7 +190,10 @@
                                     </div>
                                     <textarea id="blessing" name="blessing" rows="2" maxlength="100" required class="w-full rounded-xl px-4 py-3 text-white resize-none text-base" placeholder="期待您的暖心留言..."></textarea>
                                     <div id="ai-loader" class="absolute inset-0 bg-black/60 backdrop-blur-sm rounded-xl flex items-center justify-center hidden">
-                                        <div class="w-6 h-6 border-4 border-white/20 border-t-[#E5C07B] animate-spin rounded-full"></div>
+                                        <div class="flex flex-col items-center gap-2">
+                                            <div class="w-6 h-6 border-4 border-white/20 border-t-[#E5C07B] animate-spin rounded-full"></div>
+                                            <span class="text-xs text-[#E5C07B] animate-pulse">AI 正在構思...</span>
+                                        </div>
                                     </div>
                                 </div>
                                 <button type="submit" id="submit-btn" class="submit-btn w-full py-4 rounded-xl flex items-center justify-center gap-3 text-xl transition-all">
@@ -254,12 +257,23 @@
           measurementId: "G-5CQB83LMY5"
         };
 
-        // 更新後的 Google Sheets Web App URL
         const googleSheetUrl = "https://script.google.com/macros/s/AKfycbxnKq7PMPrc-FCLvkPiQlpJqLg2V2xUwi0SxKBFNTKqZ5l5ypeL1PWhpPahz2FmyJzF/exec"; 
         const appId = 'principal-conference-v1';
         let db, auth, user;
         let currentLang = 'zh';
         let hasLiked = localStorage.getItem('liked_' + appId) === 'true';
+
+        // 備援祝福庫：當 AI 失效時隨機選取
+        const fallbackBlessings = [
+            "凝聚智慧，共創教育新巔峰 ✨",
+            "領航未來，成就孩子無限可能 🎓",
+            "教育路上，與您攜手同行 🤝",
+            "深耕教育，引領卓越 🌟",
+            "共創卓越校園，成就教育輝煌 🏆",
+            "教育領航，共譜新篇章 📚",
+            "守護初衷，照亮學生前行道路 💡",
+            "匯聚教育能量，點亮生命火花 🔥"
+        ];
 
         const i18n = {
             zh: {
@@ -323,14 +337,11 @@
             };
 
             try {
-                // 1. 同步到 Firebase (供即時投影)
                 const regCol = collection(db, 'artifacts', appId, 'public', 'data', 'registrations');
                 const firebasePromise = addDoc(regCol, { ...formData, timestamp: serverTimestamp() });
 
-                // 2. 同步到 Google Sheets (後台存檔)
                 let sheetPromise = Promise.resolve();
                 if (googleSheetUrl) {
-                    // 使用 fetch 發送資料，處理 Google Apps Script 的 CORS 行為
                     sheetPromise = fetch(googleSheetUrl, {
                         method: 'POST',
                         mode: 'no-cors', 
@@ -339,9 +350,7 @@
                     }).catch(err => console.warn("Sheet sync warning:", err));
                 }
 
-                // 併行處理，Firebase 優先，Sheet 失敗不應阻斷 UI 成功顯示
                 await firebasePromise;
-                // 異步啟動 Sheet 同步
                 sheetPromise.then(() => console.log("Google Sheets Sync Done."));
 
                 showModal('success', i18n[currentLang].success, i18n[currentLang].successMsg);
@@ -354,22 +363,52 @@
             }
         };
 
-        // --- 以下為 UI 互動邏輯 ---
         async function doAI() {
             const loader = document.getElementById('ai-loader');
             const input = document.getElementById('blessing');
+            const aiBtnText = document.getElementById('ai-btn-text');
+            
             loader.classList.remove('hidden');
+            aiBtnText.innerText = "...";
+            
             const apiKey = "AIzaSyBzOTEWz81BVWOSSW2hIbSCMhkhFXo_UgE"; 
+            
+            // 設置超時機制：如果 API 5 秒內沒回應，直接進入備援
+            const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 5000));
+            
             try {
-                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
+                const fetchPromise = fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ contents: [{ parts: [{ text: "扮演參與校長會議的貴賓。請生成一句簡短祝福語（限15字內，繁中，不含標點，可加一個Emoji）。" }] }] })
+                    body: JSON.stringify({ 
+                        contents: [{ 
+                            parts: [{ text: "扮演參與校長會議的領袖。請生成一句簡短祝福語（限15字內，繁體中文，溫馨有力，可包含一個Emoji）。" }] 
+                        }],
+                        generationConfig: {
+                            temperature: 0.7,
+                            topK: 1,
+                            topP: 1,
+                            maxOutputTokens: 30
+                        }
+                    })
                 });
-                const data = await res.json();
-                input.value = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "";
-            } catch (err) { console.error(err); }
-            finally { loader.classList.add('hidden'); }
+
+                const response = await Promise.race([fetchPromise, timeoutPromise]);
+                const data = await response.json();
+                
+                if (data.candidates && data.candidates[0].content && data.candidates[0].content.parts) {
+                    input.value = data.candidates[0].content.parts[0].text.replace(/["\n]/g, "").trim();
+                } else {
+                    throw new Error("Invalid API Response");
+                }
+            } catch (err) { 
+                console.warn("AI Generation failed, using fallback:", err);
+                // 發生錯誤或超時時，從預設庫隨機抽一個
+                input.value = fallbackBlessings[Math.floor(Math.random() * fallbackBlessings.length)];
+            } finally { 
+                loader.classList.add('hidden'); 
+                aiBtnText.innerText = i18n[currentLang].aiBtn;
+            }
         }
 
         async function doLike(e) {
