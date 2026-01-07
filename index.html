@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>校長會議簽到系統</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Noto+Sans+TC:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gold: #E5C07B;
+            --dark-gold: #B8860B;
+            --glass-bg: rgba(10, 15, 30, 0.9);
+            --energy-glow: rgba(229, 192, 123, 0.3);
+            --ai-blue: #38BDF8;
+        }
+
+        body { 
+            font-family: 'Montserrat', 'Noto Sans TC', sans-serif; 
+            background: radial-gradient(circle at 50% 50%, #162447 0%, #0A0F1E 100%); 
+            color: #F1F5F9; 
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow: hidden; 
+        }
+
+        .projection-canvas {
+            width: 100vw;
+            height: 56.25vw; 
+            max-height: 100vh;
+            max-width: 177.78vh; 
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            padding: 3% 5%;
+            box-sizing: border-box;
+            z-index: 10;
+        }
+
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(25px);
+            border: 1px solid rgba(229, 192, 123, 0.2);
+            box-shadow: 0 20px 60px 0 rgba(0, 0, 0, 0.9);
+        }
+
+        .title-line-1 { font-size: 1.6vw; font-weight: 300; letter-spacing: 2.2em; color: var(--primary-gold); text-indent: 2.2em; }
+        .title-line-2 { font-size: 3.2vw; font-weight: 700; letter-spacing: 0.3em; color: #FFFFFF; border-top: 2px solid rgba(229, 192, 123, 0.5); padding-top: 0.8rem; }
+
+        .nav-btn, .lang-btn { background-color: rgba(255, 255, 255, 0.05); color: #94A3B8; transition: all 0.4s ease; border: 1px solid rgba(255, 255, 255, 0.1); }
+        .nav-btn.active, .lang-btn.active { background: linear-gradient(135deg, var(--primary-gold) 0%, var(--dark-gold) 100%); color: #0A0F1E; border-color: var(--primary-gold); }
+
+        .submit-btn { background: linear-gradient(135deg, #E5C07B 0%, #B8860B 100%); color: #0A0F1E; font-weight: 700; letter-spacing: 0.2em; cursor: pointer; }
+        .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        .ai-magic-btn {
+            background: rgba(56, 189, 248, 0.1);
+            border: 1px solid var(--ai-blue);
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            animation: ai-pulse 2s infinite;
+        }
+
+        @keyframes ai-pulse {
+            0% { box-shadow: 0 0 5px rgba(56, 189, 248, 0.3); }
+            50% { box-shadow: 0 0 20px rgba(56, 189, 248, 0.6); }
+            100% { box-shadow: 0 0 5px rgba(56, 189, 248, 0.3); }
+        }
+
+        .btn-attract { animation: attract-glow 3s ease-in-out infinite; position: relative; }
+        @keyframes attract-glow {
+            0%, 100% { box-shadow: 0 0 10px rgba(229, 192, 123, 0.1); border-color: rgba(229, 192, 123, 0.2); }
+            50% { box-shadow: 0 0 25px rgba(229, 192, 123, 0.4); border-color: rgba(229, 192, 123, 0.6); }
+        }
+
+        .blessing-card { 
+            display: inline-flex; 
+            flex-direction: column;
+            margin: 0 2rem; 
+            background: linear-gradient(135deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.08) 100%);
+            padding: 1.2vw 2vw; 
+            border-radius: 24px; 
+            border-top: 1px solid rgba(229, 192, 123, 0.4);
+            border-left: 8px solid var(--primary-gold);
+            min-width: 30vw;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+            animation: card-appear 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            position: relative;
+            overflow: hidden;
+        }
+
+        @keyframes card-appear {
+            from { opacity: 0; transform: translateY(30px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .marquee-content { display: inline-block; animation: marquee 120s linear infinite; white-space: nowrap; }
+        @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
+        .energy-stat-pod {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(229, 192, 123, 0.4);
+            border-radius: 80px;
+            padding: 0.8vw 3vw;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 0 40px var(--energy-glow);
+            display: flex;
+            align-items: center;
+            gap: 2vw;
+        }
+
+        .particle { position: absolute; background: radial-gradient(circle, #E5C07B 0%, transparent 70%); border-radius: 50%; pointer-events: none; opacity: 0.2; animation: float linear infinite; }
+        @keyframes float { 0% { transform: translateY(0); opacity: 0; } 50% { opacity: 0.3; } 100% { transform: translateY(-100vh); opacity: 0; } }
+
+        input, textarea { background: rgba(255, 255, 255, 0.05) !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; color: white !important; }
+        input:focus, textarea:focus { border-color: var(--primary-gold) !important; outline: none; }
+        
+        .like-burst { position: absolute; pointer-events: none; z-index: 100; }
+        @keyframes burst-up {
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
+            100% { transform: translate(-50%, -200%) scale(2.5); opacity: 0; }
+        }
+        .burst-anim { animation: burst-up 0.8s cubic-bezier(0.1, 0.8, 0.3, 1) forwards; }
+    </style>
+</head>
+<body>
+
+    <div id="particle-container" class="absolute inset-0 z-0"></div>
+
+    <div class="projection-canvas">
+        <!-- 導覽控制區 -->
+        <div class="absolute top-6 right-10 z-50 flex gap-4 scale-90 origin-right">
+            <div id="db-status-dot" class="w-3 h-3 rounded-full bg-red-500 mt-3 animate-pulse" title="資料庫狀態"></div>
+            <div class="flex space-x-1 p-1 bg-white/5 backdrop-blur-md rounded-lg border border-white/10">
+                <button id="show-input-btn" class="nav-btn px-6 py-2 text-sm font-semibold rounded-md active">簽到</button>
+                <button id="show-display-btn" class="nav-btn px-6 py-2 text-sm font-semibold rounded-md">祝福牆</button>
+            </div>
+            <div class="flex space-x-1 p-1 bg-white/5 backdrop-blur-md rounded-lg border border-white/10">
+                <button id="lang-zh-btn" class="lang-btn px-4 py-2 text-sm font-semibold rounded-md active">繁中</button>
+                <button id="lang-en-btn" class="lang-btn px-4 py-2 text-sm font-semibold rounded-md">EN</button>
+            </div>
+        </div>
+
+        <div class="flex flex-col h-full overflow-hidden">
+            <header class="mb-6 flex-shrink-0">
+                <div id="header-sub" class="title-line-1">校長會議</div>
+                <h1 id="header-main" class="title-line-2">貴賓簽到與祝福</h1>
+            </header>
+
+            <main class="flex-grow relative z-10 flex items-center justify-center overflow-hidden">
+                <!-- 簽到表單 -->
+                <section id="input-section" class="w-full grid grid-cols-1 lg:grid-cols-5 gap-10">
+                    <div class="lg:col-span-2 flex flex-col justify-center space-y-6">
+                        <div class="glass-panel p-8 rounded-3xl border-l-8 border-l-[#E5C07B] flex flex-col justify-between h-full">
+                            <div>
+                                <h2 class="text-2xl font-light mb-4 tracking-[0.3em] text-white uppercase">Guest Sign-In</h2>
+                                <p id="welcome-msg" class="text-gray-400 font-light leading-relaxed mb-6 text-sm">歡迎各位教育領袖蒞臨。您的每一份祝福都是支持我們前行的正能量。</p>
+                            </div>
+                            <button type="button" id="event-like-btn" class="btn-attract w-full bg-white/5 border border-white/10 rounded-full py-4 flex items-center justify-center gap-3 transition-all hover:shadow-[0_0_30px_rgba(229,192,123,0.4)] active:scale-95 group">
+                                <svg id="heart-icon" class="w-8 h-8 stroke-white/40 fill-none transition-all duration-300 group-hover:fill-red-500/20" viewBox="0 0 24 24" stroke-width="1.5">
+                                    <path d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                                </svg>
+                                <span id="like-btn-text" class="text-xl font-bold text-white/80 tracking-[0.2em] uppercase">請為活動點讚</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="lg:col-span-3">
+                        <div class="glass-panel p-8 rounded-3xl">
+                            <form id="guest-form" class="space-y-5">
+                                <div class="grid grid-cols-2 gap-5">
+                                    <input type="text" id="name" placeholder="姓名 / Name" required class="w-full rounded-xl px-4 py-3 text-white text-base">
+                                    <input type="text" id="organization" placeholder="服務單位 / Organization" required class="w-full rounded-xl px-4 py-3 text-white text-base">
+                                </div>
+                                <input type="text" id="title-field" placeholder="職稱 / Title" required class="w-full rounded-xl px-4 py-3 text-white text-base">
+                                <div class="relative">
+                                    <div class="flex justify-between items-center mb-2 px-1">
+                                        <label class="text-[10px] text-gray-400 font-semibold uppercase tracking-widest">祝福辭 / Blessing</label>
+                                        <button type="button" id="ai-btn" class="ai-magic-btn px-4 py-1.5 rounded-full text-xs font-bold text-white flex items-center gap-2">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-cyan-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                            </svg>
+                                            <span id="ai-btn-text">AI 智繪祝福</span>
+                                        </button>
+                                    </div>
+                                    <textarea id="blessing" rows="2" maxlength="100" required class="w-full rounded-xl px-4 py-3 text-white resize-none text-base" placeholder="期待您的暖心留言..."></textarea>
+                                    <div id="ai-loader" class="absolute inset-0 bg-black/60 backdrop-blur-sm rounded-xl flex items-center justify-center hidden">
+                                        <div class="w-6 h-6 border-4 border-white/20 border-t-[#E5C07B] animate-spin rounded-full"></div>
+                                    </div>
+                                </div>
+                                <button type="submit" id="submit-btn" class="submit-btn w-full py-4 rounded-xl flex items-center justify-center gap-3 text-xl transition-all">
+                                    <span id="submit-text">提交簽到訊息</span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 祝福牆展示 -->
+                <section id="display-section" class="hidden w-full h-full flex flex-col items-center justify-between py-4">
+                    <div id="no-blessings" class="flex-grow flex items-center justify-center opacity-30">
+                        <p class="text-4xl font-light tracking-widest italic">凝聚智慧，共創卓越</p>
+                    </div>
+                    
+                    <div id="marquee-wall" class="w-screen flex-grow flex flex-col justify-center space-y-8 overflow-hidden hidden">
+                        <div class="marquee-container w-full overflow-hidden"><div id="m-row-1" class="marquee-content"></div></div>
+                        <div class="marquee-container w-full overflow-hidden"><div id="m-row-2" class="marquee-content"></div></div>
+                    </div>
+
+                    <div id="stats-container" class="mt-4 hidden flex justify-center w-full">
+                        <div class="energy-stat-pod">
+                            <svg class="w-12 h-12 fill-red-500 animate-pulse" viewBox="0 0 24 24">
+                                <path d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                            </svg>
+                            <div class="flex flex-col">
+                                <span id="stats-label" class="text-[0.7vw] font-bold uppercase tracking-[0.4em] text-white/50 mb-0.5">累計教育正能量</span>
+                                <div class="flex items-baseline gap-2">
+                                    <span id="total-likes" class="text-5xl font-black text-[#E5C07B] tabular-nums">0</span>
+                                    <span class="text-base text-white/30 font-light tracking-widest">UNIT</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <!-- 訊息提示視窗 -->
+    <div id="status-modal" class="fixed inset-0 bg-black/90 backdrop-blur-xl flex items-center justify-center opacity-0 pointer-events-none transition-all z-[100]">
+        <div class="glass-panel p-10 rounded-[40px] max-w-lg w-full text-center">
+            <div id="modal-icon" class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 bg-white/5 border border-white/10"></div>
+            <h3 id="modal-title" class="text-2xl font-bold text-white mb-3"></h3>
+            <p id="modal-msg" class="text-base text-gray-400 mb-8 font-light"></p>
+            <button onclick="closeModal()" class="w-full py-4 bg-white/10 hover:bg-white/20 text-white text-lg font-semibold rounded-2xl transition-all">關閉</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, doc, updateDoc, increment, setDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+          apiKey: "AIzaSyAY2u8kg2H1MnmqDHOcOMIiod4kYJhY4oE",
+          authDomain: "project-8750994532548258918.firebaseapp.com",
+          projectId: "project-8750994532548258918",
+          storageBucket: "project-8750994532548258918.firebasestorage.app",
+          messagingSenderId: "655473516916",
+          appId: "1:655473516916:web:b971f0b7ae005b82558c21",
+          measurementId: "G-5CQB83LMY5"
+        };
+
+        // GAS 試算表連結（測試時可保留空白）
+        const googleSheetUrl = ""; 
+
+        const appId = 'principal-conference-v1';
+        let db, auth, user;
+        let currentLang = 'zh';
+        let hasLiked = localStorage.getItem('liked_' + appId) === 'true';
+
+        const i18n = {
+            zh: {
+                hSub: "校長會議", hMain: "貴賓簽到與祝福",
+                welcome: "歡迎各位教育領袖蒞臨。您的每一份祝福都是支持我們前行的正能量。",
+                aiBtn: "AI 智繪祝福", submit: "提交簽到訊息",
+                success: "提交成功", successMsg: "您的資料已同步。",
+                like: "請為活動點讚", liked: "感謝支持", stats: "累計教育正能量",
+                aiPrompt: "扮演校長會議參與者。請生成一句簡短祝福語（限15字內，繁中）。規則：1.嚴禁包含姓名、職稱、單位。2.嚴禁使用引號、星號、括號等任何非文字標點符號。3.僅允許在句尾附上一個 Emoji。範例：願教育之光照亮未來 💡"
+            },
+            en: {
+                hSub: "PRINCIPAL CONFERENCE", hMain: "GUEST WELCOME",
+                welcome: "Welcome leaders. Your blessing provides positive energy.",
+                aiBtn: "AI Magic", submit: "Submit Entry",
+                success: "Success", successMsg: "Data synchronized.",
+                like: "LIKE THE EVENT", liked: "SUPPORTED", stats: "ENERGY STATS",
+                aiPrompt: "School leader. Concise blessing (<10 words). Rules: 1. NO names/titles/orgs. 2. NO symbols like *, quotes, brackets. 3. ONLY one emoji at the end."
+            }
+        };
+
+        async function init() {
+            createParticles();
+            updateUI();
+            try {
+                const app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+                await signInAnonymously(auth);
+                onAuthStateChanged(auth, (u) => {
+                    if (u) {
+                        user = u;
+                        document.getElementById('db-status-dot').classList.replace('bg-red-500', 'bg-green-500');
+                        setupSync();
+                    }
+                });
+            } catch (e) { console.error("Firebase Init Error:", e); }
+        }
+
+        function setupSync() {
+            const regCol = collection(db, 'artifacts', appId, 'public', 'data', 'registrations');
+            onSnapshot(regCol, (snap) => {
+                const data = snap.docs.map(d => d.data()).sort((a,b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+                renderWall(data);
+            }, (err) => console.error(err));
+
+            const statsDoc = doc(db, 'artifacts', appId, 'public', 'data', 'stats', 'counter');
+            onSnapshot(statsDoc, (snap) => {
+                if (snap.exists()) {
+                    const val = snap.data().likes || 0;
+                    document.getElementById('total-likes').innerText = val;
+                }
+            }, (err) => console.error(err));
+        }
+
+        async function doAI() {
+            const loader = document.getElementById('ai-loader');
+            loader.classList.remove('hidden');
+            const promptText = i18n[currentLang].aiPrompt;
+            
+            const callGemini = async (retries = 5, delay = 1000) => {
+                try {
+                    const apiKey = ""; // API Key will be injected by the environment
+                    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }] })
+                    });
+                    if (!res.ok) throw new Error('API Error');
+                    const data = await res.json();
+                    let text = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+                    // 強化清理：移除所有常見標點與符號，保留文字與 Emoji
+                    text = text.replace(/[*"'「」'『』()（）\[\]{}\-_#!?.,，。：；]/g, "").trim();
+                    if (text) document.getElementById('blessing').value = text;
+                } catch (err) {
+                    if (retries > 0) {
+                        setTimeout(() => callGemini(retries - 1, delay * 2), delay);
+                    } else {
+                        showModal('error', 'AI 忙碌中', '請手動輸入或稍後再試。');
+                    }
+                } finally {
+                    loader.classList.add('hidden');
+                }
+            };
+            callGemini();
+        }
+
+        document.getElementById('guest-form').onsubmit = async (e) => {
+            e.preventDefault();
+            if (!user) return;
+            const btn = document.getElementById('submit-btn');
+            btn.disabled = true;
+            const payload = {
+                name: document.getElementById('name').value,
+                organization: document.getElementById('organization').value,
+                title: document.getElementById('title-field').value,
+                blessing: document.getElementById('blessing').value
+            };
+
+            try {
+                const regCol = collection(db, 'artifacts', appId, 'public', 'data', 'registrations');
+                await addDoc(regCol, { ...payload, timestamp: serverTimestamp() });
+                if (googleSheetUrl) {
+                    fetch(googleSheetUrl, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
+                }
+                showModal('success', i18n[currentLang].success, i18n[currentLang].successMsg);
+                document.getElementById('guest-form').reset();
+            } catch (err) { 
+                showModal('error', '提交失敗', '請確認網路連線');
+            } finally { 
+                btn.disabled = false; 
+            }
+        };
+
+        async function doLike(e) {
+            if (hasLiked || !user) return;
+            hasLiked = true; 
+            localStorage.setItem('liked_' + appId, 'true'); 
+            updateUI();
+            
+            // 觸發愛心噴發特效
+            createLikeAnimation(e);
+
+            const statsDoc = doc(db, 'artifacts', appId, 'public', 'data', 'stats', 'counter');
+            try { await updateDoc(statsDoc, { likes: increment(1) }); } 
+            catch { await setDoc(statsDoc, { likes: 1 }, { merge: true }); }
+        }
+
+        function createLikeAnimation(e) {
+            for(let i=0; i<8; i++) {
+                const burst = document.createElement('div');
+                burst.className = 'like-burst';
+                burst.style.left = `${e.clientX}px`;
+                burst.style.top = `${e.clientY}px`;
+                const heart = document.createElement('div');
+                heart.innerHTML = `<svg class="w-6 h-6 fill-red-500" viewBox="0 0 24 24"><path d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" /></svg>`;
+                heart.className = 'burst-anim';
+                const angle = (Math.random() * 360); 
+                const dist = Math.random() * 80 + 40;
+                heart.style.transform = `rotate(${angle}deg) translate(${dist}px)`;
+                burst.appendChild(heart);
+                document.body.appendChild(burst);
+                setTimeout(() => burst.remove(), 800);
+            }
+        }
+
+        function updateUI() {
+            const t = i18n[currentLang];
+            document.getElementById('header-sub').innerText = t.hSub;
+            document.getElementById('header-main').innerText = t.hMain;
+            document.getElementById('welcome-msg').innerText = t.welcome;
+            document.getElementById('ai-btn-text').innerText = t.aiBtn;
+            document.getElementById('submit-text').innerText = t.submit;
+            document.getElementById('like-btn-text').innerText = hasLiked ? t.liked : t.like;
+            document.getElementById('stats-label').innerText = t.stats;
+            
+            const heart = document.getElementById('heart-icon');
+            if (hasLiked) {
+                heart.style.fill = '#FF4D4D';
+                heart.style.stroke = '#FF4D4D';
+            }
+        }
+
+        function renderWall(list) {
+            const wall = document.getElementById('marquee-wall');
+            const none = document.getElementById('no-blessings');
+            const stats = document.getElementById('stats-container');
+            if (!list.length) return;
+            wall.classList.remove('hidden'); none.classList.add('hidden'); stats.classList.remove('hidden');
+            const r1 = document.getElementById('m-row-1'), r2 = document.getElementById('m-row-2');
+            
+            const generateCard = (item) => `
+                <div class="blessing-card">
+                    <div class="text-[1.6vw] text-white font-semibold mb-4 leading-[1.4] tracking-wider">
+                        ${item.blessing}
+                    </div>
+                    <div class="flex flex-col border-t border-white/20 pt-3">
+                        <div class="text-[1.8vw] text-[#E5C07B] font-bold tracking-[0.1em] mb-0.5 flex items-baseline">
+                            ${item.name} 
+                            <span class="text-[1vw] text-white/40 font-medium ml-2 tracking-normal italic">${item.title || ''}</span>
+                        </div>
+                        <div class="text-[1.3vw] text-white/60 font-semibold uppercase tracking-[0.05em]">
+                            ${item.organization}
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            r1.innerHTML = r2.innerHTML = '';
+            list.forEach((item, i) => {
+                const card = generateCard(item);
+                if (i % 2 === 0) r1.innerHTML += card; else r2.innerHTML += card;
+            });
+            // 重複內容以實現無縫滾動
+            if (list.length > 0) {
+                r1.innerHTML += r1.innerHTML;
+                r2.innerHTML += r2.innerHTML;
+            }
+        }
+
+        function showModal(type, title, msg) {
+            const modal = document.getElementById('status-modal');
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-msg').innerText = msg;
+            const icon = document.getElementById('modal-icon');
+            icon.innerHTML = type === 'success' ? '✅' : '❌';
+            icon.className = "text-4xl mb-4";
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+        }
+
+        window.closeModal = () => document.getElementById('status-modal').classList.add('opacity-0', 'pointer-events-none');
+        document.getElementById('show-input-btn').onclick = () => { 
+            document.getElementById('input-section').classList.remove('hidden'); 
+            document.getElementById('display-section').classList.add('hidden'); 
+            document.getElementById('show-input-btn').classList.add('active'); 
+            document.getElementById('show-display-btn').classList.remove('active'); 
+        };
+        document.getElementById('show-display-btn').onclick = () => { 
+            document.getElementById('input-section').classList.add('hidden'); 
+            document.getElementById('display-section').classList.remove('hidden'); 
+            document.getElementById('show-display-btn').classList.add('active'); 
+            document.getElementById('show-input-btn').classList.remove('active'); 
+        };
+        document.getElementById('ai-btn').onclick = doAI;
+        document.getElementById('event-like-btn').onclick = doLike;
+        document.getElementById('lang-zh-btn').onclick = () => { currentLang='zh'; updateUI(); document.getElementById('lang-zh-btn').classList.add('active'); document.getElementById('lang-en-btn').classList.remove('active'); };
+        document.getElementById('lang-en-btn').onclick = () => { currentLang='en'; updateUI(); document.getElementById('lang-en-btn').classList.add('active'); document.getElementById('lang-zh-btn').classList.remove('active'); };
+
+        function createParticles() {
+            const container = document.getElementById('particle-container');
+            for (let i = 0; i < 20; i++) {
+                const p = document.createElement('div');
+                p.className = 'particle';
+                const s = Math.random() * 4 + 2;
+                p.style.cssText = `width:${s}px; height:${s}px; left:${Math.random()*100}%; top:${Math.random()*100}%; animation-duration:${Math.random()*10+15}s;`;
+                container.appendChild(p);
+            }
+        }
+
+        init();
+    </script>
+</body>
+</html>
