@@ -51,6 +51,7 @@
         .nav-btn.active { background: linear-gradient(135deg, var(--primary-gold) 0%, var(--dark-gold) 100%); color: #0A0F1E; border-color: var(--primary-gold); }
 
         .submit-btn { background: linear-gradient(135deg, #E5C07B 0%, #B8860B 100%); color: #0A0F1E; font-weight: 700; letter-spacing: 0.2em; cursor: pointer; }
+        .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
         
         @keyframes heart-beat { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
         .heart-pulse { animation: heart-beat 1.5s infinite ease-in-out; }
@@ -124,16 +125,16 @@
                     <div class="lg:col-span-2 flex flex-col justify-center">
                         <div class="glass-panel p-6 lg:p-8 rounded-3xl border-l-8 border-[#E5C07B]">
                             <h2 class="text-2xl font-light mb-4 text-white uppercase tracking-wider">Join Us</h2>
-                            <p class="text-sm lg:text-base text-gray-400 font-light leading-relaxed mb-6">點擊下方按鈕，為本次大會注入滿滿的能量與祝福！</p>
+                            <p class="text-sm lg:text-base text-gray-400 font-light leading-relaxed mb-6">點擊下方按鈕，為大會注入今日的能量！</p>
                             
                             <button type="button" id="event-like-btn" class="relative overflow-hidden w-full bg-white/10 border border-[#E5C07B]/40 rounded-full py-5 flex flex-col items-center justify-center gap-1 transition-all active:scale-95 group shadow-lg">
                                 <div class="flex items-center gap-3">
                                     <svg class="w-8 h-8 fill-[#FF4D4D] group-hover:scale-125 transition-transform duration-300 heart-pulse" viewBox="0 0 24 24">
                                         <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
                                     </svg>
-                                    <span class="text-lg font-bold text-white tracking-widest uppercase">為大會集氣點讚</span>
+                                    <span class="text-lg font-bold text-white tracking-widest uppercase">今日集氣點讚</span>
                                 </div>
-                                <span class="text-[9px] text-white/40 uppercase tracking-widest">( 每日自動歸零 )</span>
+                                <span class="text-[9px] text-white/40 uppercase tracking-widest">( 讚數每日重置 )</span>
                             </button>
                         </div>
                     </div>
@@ -197,7 +198,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, doc, updateDoc, increment, setDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, doc, updateDoc, increment, setDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAY2u8kg2H1MnmqDHOcOMIiod4kYJhY4oE",
@@ -208,24 +209,24 @@
             appId: "1:655473516916:web:b971f0b7ae005b82558c21"
         };
 
-        // 更新後的 Google Sheet URL
         const googleSheetUrl = "https://script.google.com/macros/s/AKfycbxF2eAnlVFX6sNg7JRr4WjHcbhg-tnVBpDqUBp3g6BHotaCaVEXV0NAHKemIVuR22BR/exec"; 
         const appId = 'principal-conference-v1';
-        let db, auth, user;
+        let db, auth, user = null;
 
-        const getTodayId = () => new Date().toLocaleDateString('sv-SE'); // YYYY-MM-DD
+        // 輔助函式：取得今日日期 ID (YYYY-MM-DD)
+        const getTodayId = () => new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Taipei' });
 
         const quotes = [
             "科技領導，引領教育新風範 🚀", "創新人才，培育未來競爭力 💡", "知時愛農，紮根土地情懷 🌱", "健康時尚，展現校園新美學 🧘", "科技與農業交織，創新無限 🌾", 
             "以科技驅動創新，以人才引領未來 ✨", "愛農識時，智慧耕耘校園 🌳", "健康生活，時尚校園，卓越領導 🌟", "創新思維，科技賦能教育前瞻 📡", "守護土地，科技領航人才培育 🛡️",
-            "數位轉型，共創教育新巔峰 📈", "科技領導，點亮創新火花 🔥", "健康校園，培育時尚新世代 🎨", "知時愛農，體驗生命教育之美 🍃", "科技人才，創新未來，從我開始 🙋",
+            "數位轉型，共創教育新巔峰 📈", "點亮教育火花，科技領航未來 🔥", "健康校園，培育時尚新世代 🎨", "知時愛農，體驗生命教育之美 🍃", "科技人才，創新未來，從我開始 🙋",
             "領航科技，卓越創新，教育共好 🤝", "時尚健康，校長會議共襄盛舉 🎊", "知時惜物，愛農深耕，共創永續 🌍", "科技領航，創新種子遍地開花 🌸", "多元人才，科技領導，教育共榮 💎",
-            "數位力即競爭力，引領科技校園 💻", "創新人才培育，接軌世界舞台 🗺️", "健康時尚新校園，活力無限 ⚡", "知時愛農，傳承土地的智慧 🍎", "科技引領，教育轉型不設限 🔓",
-            "創新思維，打造卓越科技人才 🛠️", "時尚生活，健康校園，引領風潮 🌊", "知時節，愛農事，深植教育魂 🧡", "科技領導，卓越創新，教育首選 🥇", "跨域人才，科技領航，未來可期 🌈",
-            "科技創新，啟迪學生無限可能 🧠", "健康時尚，校長領航教育之美 🦢", "愛農教育，知時而動，永續發展 ♻️", "領導力轉型，科技與創新並進 ⚙️", "人才匯聚，科技領航，共譜新章 📖",
-            "智慧科技，創新應用，人才卓越 🎖️", "健康時尚，品味校園新生活 ☕", "知時愛農，實踐環境永續美學 🌻", "科技創新，賦予人才新價值 💎", "跨界領導，科技與農業的對話 🗨️",
-            "科技先鋒，創新教育，人才輩出 🎓", "時尚健康，共創幸福校園氛圍 🥰", "知時惜福，愛農耕耘，教育長青 🌲", "科技領航，創新未來，教育新藍圖 🗺️", "卓越領導，人才為本，科技加持 ➕",
-            "創新驅動，科技領導，卓越再現 💫", "時尚健康，校園文化新高度 🏰", "知時愛農，深耕本土，接軌國際 🌏", "科技與人才共舞，創新與未來同行 💃", "校長會議，共創科技創新新紀元 🚀"
+            "數位力即競爭力，引領科技校園 💻", "創新人才培育，接軌世界舞台 🗺️", "健康時尚新校園，活力無限 ⚡", "傳承土地智慧，啟發科技新思維 🍎", "科技引領，教育轉型不設限 🔓",
+            "打造卓越科技人才，共創校園新頁 🛠️", "時尚生活，健康校園，領航風潮 🌊", "知時節，愛農事，深植教育靈魂 🧡", "科技領導，卓越創新，教育首選 🥇", "跨域人才，科技領航，未來可期 🌈",
+            "智慧校園，科技領航，教育永續 🏛️", "育才無國界，科技領先機 🌐", "農情教育，科技生活，時尚領航 🌻", "創新教育模式，科技領導先鋒 🚀", "健康教育新主張，時尚領航新視界 🔭",
+            "紮根科技，創新未來，成就學子 🎯", "愛農心，科技情，校長會議聚菁英 💠", "領航新教育，科技創奇蹟 🪄", "時尚校園魅力，科技領導活力 🔋", "知時惜時，愛農愛學，共創共好 🍀",
+            "科技賦能，創新領航，教育升級 ⬆️", "卓越領導，科技先行，人才輩出 🎓", "健康時尚校園，科技創新生活 🧥", "愛農識時，科技領路，深耕教育 🚜", "科技人才搖籃，創新未來殿堂 🏛️",
+            "數位領航，教育轉骨，科技創新 🐲", "時尚校園心，科技領導力 🦁", "知時愛農情，科技創未來 🦋", "科技領航員，教育建築師 🏗️", "創新不息，科技領航，卓越教育 ♾️"
         ];
 
         async function init() {
@@ -234,52 +235,65 @@
                 const app = initializeApp(firebaseConfig);
                 auth = getAuth(app);
                 db = getFirestore(app);
+                
                 await signInAnonymously(auth);
+                
                 onAuthStateChanged(auth, (u) => { 
                     if (u) { 
                         user = u; 
                         document.getElementById('db-status-dot').classList.replace('bg-red-500', 'bg-green-500'); 
-                        document.getElementById('sync-label').innerText = "連線成功：實時同步中";
+                        document.getElementById('sync-label').innerText = "連線成功：資料庫實時同步中";
                         setupSync(); 
-                    } 
+                    } else {
+                        document.getElementById('db-status-dot').classList.replace('bg-green-500', 'bg-red-500');
+                        document.getElementById('sync-label').innerText = "連線中斷，請檢查網路";
+                    }
                 });
-            } catch (e) { console.error("Init Error:", e); }
+            } catch (e) { 
+                console.error("Firebase Init Error:", e); 
+            }
         }
 
         function setupSync() {
             if (!user) return;
-            const today = getTodayId();
-            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'registrations'), (snap) => {
+            
+            // 1. 監聽簽到列表 (全期累計)
+            const registrationsCol = collection(db, 'artifacts', appId, 'public', 'data', 'registrations');
+            onSnapshot(registrationsCol, (snap) => {
                 const data = snap.docs
                     .map(d => d.data())
-                    .filter(item => item.dateTag === today)
                     .sort((a,b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
                 renderWall(data);
-            });
-            onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'stats', today), (snap) => {
+            }, (err) => console.error("Registrations sync error:", err));
+
+            // 2. 監聽讚數 (每日重置路徑)
+            const statsDoc = doc(db, 'artifacts', appId, 'public', 'data', 'stats', `stats-${getTodayId()}`);
+            onSnapshot(statsDoc, (snap) => {
                 const count = snap.exists() ? snap.data().likes : 0;
                 animateCount(count);
-            });
+            }, (err) => console.error("Stats sync error:", err));
         }
 
         async function handleLike(e) {
             if (e && e.cancelable) e.preventDefault();
             if (!user) return;
             spawnHearts(e);
-            const today = getTodayId();
             try {
-                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'stats', today), {
+                // 讚數寫入今日專屬文件
+                const statsRef = doc(db, 'artifacts', appId, 'public', 'data', 'stats', `stats-${getTodayId()}`);
+                await setDoc(statsRef, {
                     likes: increment(1),
-                    date: today,
+                    date: getTodayId(),
                     lastUpdated: serverTimestamp()
                 }, { merge: true });
-            } catch (err) { console.error("Like Sync Failed:", err); }
+            } catch (err) { console.error("Like Error:", err); }
         }
 
         document.getElementById('guest-form').onsubmit = async (e) => {
             e.preventDefault();
+            if (!user) return;
+
             const btn = document.getElementById('submit-btn');
-            const today = getTodayId();
             const now = new Date().toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' });
             
             const formData = {
@@ -287,11 +301,11 @@
                 organization: document.getElementById('organization').value,
                 title: document.getElementById('title-field').value,
                 blessing: document.getElementById('blessing').value,
-                dateTag: today,
-                timestamp: serverTimestamp()
+                timestamp: serverTimestamp(),
+                dateTag: getTodayId(), // 保留日期標記以便後續分析
+                uid: user.uid
             };
 
-            // 根據您的 GAS 代碼格式準備資料
             const sheetData = {
                 time: now,
                 name: formData.name,
@@ -302,39 +316,41 @@
 
             btn.disabled = true;
             try {
-                // 1. 同步至 Firebase
-                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'registrations'), formData);
+                const registrationsRef = collection(db, 'artifacts', appId, 'public', 'data', 'registrations');
+                await addDoc(registrationsRef, formData);
                 
-                // 2. 同步至 Google Sheet
                 if (googleSheetUrl) {
-                    await fetch(googleSheetUrl, {
+                    fetch(googleSheetUrl, {
                         method: 'POST',
                         mode: 'no-cors',
                         cache: 'no-cache',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(sheetData)
-                    });
+                    }).catch(err => console.error("Sheet error:", err));
                 }
 
-                showModal('簽到成功', '您的祝福已同步至雲端與螢幕。');
+                showModal('簽到成功', '您的祝福已成功同步至牆面！');
                 document.getElementById('guest-form').reset();
             } catch (err) {
-                console.error("Submit Error:", err);
-                showModal('錯誤', '資料傳輸失敗，請稍後再試。');
-            } finally { btn.disabled = false; }
+                console.error("Firebase Sync Error:", err);
+            } finally { 
+                btn.disabled = false; 
+            }
         };
 
         function animateCount(newCount) {
             const el = document.getElementById('total-likes');
             const visual = document.getElementById('stats-visual');
-            el.innerText = newCount;
-            visual.classList.add('bump');
-            setTimeout(() => visual.classList.remove('bump'), 200);
+            if (el) el.innerText = newCount;
+            if (visual) {
+                visual.classList.add('bump');
+                setTimeout(() => visual.classList.remove('bump'), 200);
+            }
         }
 
         function renderWall(list) {
             const r1 = document.getElementById('m-row-1'), r2 = document.getElementById('m-row-2');
-            if (!list.length) return;
+            if (!list || !list.length || !r1 || !r2) return;
             const card = (i) => `<div class="blessing-card group"><div class="text-xl lg:text-2xl text-white font-bold mb-3 tracking-wide">"${i.blessing}"</div><div class="flex items-center gap-2"><div class="w-1.5 h-1.5 rounded-full bg-[#E5C07B]"></div><div class="text-sm text-[#E5C07B] font-medium tracking-widest">${i.name} · ${i.organization} <span class="opacity-60 text-[10px] ml-2">${i.title}</span></div></div></div>`;
             let h1 = '', h2 = '';
             list.forEach((item, idx) => { if (idx % 2 === 0) h1 += card(item); else h2 += card(item); });
@@ -343,6 +359,7 @@
 
         function spawnHearts(e) {
             const btn = document.getElementById('event-like-btn');
+            if (!btn) return;
             const rect = btn.getBoundingClientRect();
             const cx = (e.touches ? e.touches[0].clientX : e.clientX) || (rect.left + rect.width / 2);
             const cy = (e.touches ? e.touches[0].clientY : e.clientY) || (rect.top + rect.height / 2);
@@ -358,6 +375,7 @@
 
         function createParticles() {
             const c = document.getElementById('particle-container');
+            if (!c) return;
             for (let i = 0; i < 15; i++) {
                 const p = document.createElement('div'); p.className = 'particle';
                 p.style.cssText = `width:3px; height:3px; left:${Math.random()*100}%; top:${Math.random()*100}%; animation: float ${Math.random()*5+10}s linear infinite;`;
@@ -366,9 +384,10 @@
         }
 
         function showModal(title, msg) {
-            document.getElementById('modal-title').innerText = title;
-            document.getElementById('modal-msg').innerText = msg;
-            document.getElementById('status-modal').classList.remove('opacity-0', 'pointer-events-none');
+            const t = document.getElementById('modal-title'), m = document.getElementById('modal-msg'), modal = document.getElementById('status-modal');
+            if (t) t.innerText = title;
+            if (m) m.innerText = msg;
+            if (modal) modal.classList.remove('opacity-0', 'pointer-events-none');
         }
 
         document.getElementById('close-modal-btn').onclick = () => document.getElementById('status-modal').classList.add('opacity-0', 'pointer-events-none');
