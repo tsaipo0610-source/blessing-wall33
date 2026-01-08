@@ -13,7 +13,6 @@
             --primary-gold: #E5C07B;
             --dark-gold: #B8860B;
             --glass-bg: rgba(10, 15, 30, 0.9);
-            --ai-blue: #38BDF8;
             --heart-red: #FF4D4D;
         }
 
@@ -27,8 +26,7 @@
             justify-content: center;
             min-height: 100vh;
             overflow-x: hidden;
-            /* 防止整個頁面被手勢縮放 */
-            touch-action: pan-x pan-y;
+            touch-action: manipulation;
         }
 
         .projection-canvas {
@@ -37,7 +35,7 @@
             position: relative;
             display: flex;
             flex-direction: column;
-            padding: 20px 5%; /* 手機端縮減邊距 */
+            padding: 20px 5%;
             box-sizing: border-box;
             z-index: 10;
         }
@@ -58,10 +56,10 @@
 
         .submit-btn { background: linear-gradient(135deg, #E5C07B 0%, #B8860B 100%); color: #0A0F1E; font-weight: 700; letter-spacing: 0.2em; cursor: pointer; }
         
-        /* 核心優化：防止連點縮放 */
         #event-like-btn {
             touch-action: manipulation;
             -webkit-tap-highlight-color: transparent;
+            user-select: none;
         }
 
         @keyframes heart-beat {
@@ -102,23 +100,22 @@
             background: rgba(255, 255, 255, 0.08) !important; 
             border: 1px solid rgba(255, 255, 255, 0.2) !important; 
             color: white !important;
-            font-size: 16px !important; /* 防止 iOS 輸入時縮放 */
+            font-size: 16px !important; 
         }
         
-        .particle { position: absolute; background: radial-gradient(circle, #E5C07B 0%, transparent 70%); border-radius: 50%; pointer-events: none; opacity: 0.1; animation: float linear infinite; }
-        @keyframes float { 0% { transform: translateY(0) translateX(0); } 50% { transform: translateY(-20px) translateX(10px); } 100% { transform: translateY(0) translateX(0); } }
-
         .count-up-container {
             transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        .bump { transform: scale(1.3); color: var(--primary-gold) !important; }
+        .bump { transform: scale(1.1); color: var(--primary-gold) !important; }
+
+        .particle { position: absolute; background: radial-gradient(circle, #E5C07B 0%, transparent 70%); border-radius: 50%; pointer-events: none; opacity: 0.1; animation: float linear infinite; }
+        @keyframes float { 0% { transform: translateY(0) translateX(0); } 50% { transform: translateY(-20px) translateX(10px); } 100% { transform: translateY(0) translateX(0); } }
     </style>
 </head>
 <body>
     <div id="particle-container" class="absolute inset-0 z-0"></div>
 
     <div class="projection-canvas">
-        <!-- System Status & Navigation -->
         <div class="flex flex-col md:flex-row items-center justify-between gap-4 mb-6 z-50">
             <div class="flex items-center gap-3 bg-black/20 px-4 py-2 rounded-full border border-white/5">
                 <div id="db-status-dot" class="w-2.5 h-2.5 rounded-full bg-red-500"></div>
@@ -139,26 +136,25 @@
 
         <div class="flex flex-col h-full">
             <header class="mb-8 text-center lg:text-left">
-                <div id="header-sub" class="text-lg lg:text-3xl font-light tracking-[0.5em] text-[#E5C07B] uppercase mb-2">校長會議</div>
-                <h1 id="header-main" class="text-2xl lg:text-6xl font-bold tracking-tight text-white border-t-2 border-white/10 pt-4">凝聚卓越 · 引領創新</h1>
+                <div id="header-sub" class="text-sm lg:text-xl font-light tracking-[0.3em] text-[#E5C07B] uppercase mb-2">科技領導 創新人才 / 知時愛農 健康時尚</div>
+                <h1 id="header-main" class="text-2xl lg:text-6xl font-bold tracking-tight text-white border-t-2 border-white/10 pt-4">校長會議：凝聚卓越 · 引領未來</h1>
             </header>
 
             <main class="flex-grow flex items-center justify-center">
-                <!-- Mobile Sign-in Section -->
                 <section id="input-section" class="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-5 gap-6 lg:gap-8">
                     <div class="lg:col-span-2 flex flex-col justify-center">
                         <div class="glass-panel p-6 lg:p-8 rounded-3xl border-l-8 border-[#E5C07B]">
                             <h2 class="text-2xl font-light mb-4 text-white uppercase tracking-wider">Join Us</h2>
-                            <p id="welcome-msg" class="text-sm lg:text-base text-gray-400 font-light leading-relaxed mb-6">您的到訪與祝福是我們前進的動力。請完成簽到並為大會集氣點讚！</p>
+                            <p id="welcome-msg" class="text-sm lg:text-base text-gray-400 font-light leading-relaxed mb-6">點擊下方按鈕，為本次大會注入滿滿的能量與祝福！</p>
                             
                             <button type="button" id="event-like-btn" class="relative overflow-hidden w-full bg-white/10 border border-[#E5C07B]/40 rounded-full py-5 flex flex-col items-center justify-center gap-1 transition-all active:scale-95 group shadow-lg">
                                 <div class="flex items-center gap-3">
                                     <svg class="w-8 h-8 fill-[#FF4D4D] group-hover:scale-125 transition-transform duration-300 heart-pulse" viewBox="0 0 24 24">
                                         <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
                                     </svg>
-                                    <span id="like-btn-text" class="text-lg font-bold text-white tracking-widest uppercase">為大會點讚</span>
+                                    <span id="like-btn-text" class="text-lg font-bold text-white tracking-widest uppercase">為大會集氣點讚</span>
                                 </div>
-                                <span class="text-[9px] text-white/40 uppercase tracking-widest">( 快速連點集氣 )</span>
+                                <span class="text-[9px] text-white/40 uppercase tracking-widest">( 無限次集氣 )</span>
                             </button>
                         </div>
                     </div>
@@ -174,8 +170,8 @@
                                 <div class="relative">
                                     <div class="flex justify-between items-center mb-2">
                                         <label class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">祝福留言</label>
-                                        <button type="button" id="ai-btn" class="bg-sky-500/20 border border-sky-400/50 px-3 py-1.5 rounded-full text-[10px] font-bold text-sky-400 flex items-center gap-1 animate-pulse">
-                                            ✨ 智慧靈感
+                                        <button type="button" id="ai-btn" class="bg-sky-500/20 border border-sky-400/50 px-3 py-1.5 rounded-full text-[10px] font-bold text-sky-400 flex items-center gap-1">
+                                            ✨ 靈感產生器
                                         </button>
                                     </div>
                                     <textarea id="blessing" name="blessing" rows="3" maxlength="100" required class="w-full rounded-xl px-4 py-4 text-white resize-none" placeholder="輸入您的祝福..."></textarea>
@@ -191,16 +187,15 @@
                     </div>
                 </section>
 
-                <!-- Big Screen Display Section -->
                 <section id="display-section" class="hidden w-full h-full flex flex-col items-center justify-center">
-                    <div id="marquee-wall" class="w-screen flex flex-col justify-center space-y-12 overflow-hidden py-10">
+                    <div id="marquee-wall" class="w-screen flex flex-col justify-center space-y-8 overflow-hidden py-10">
                         <div class="marquee-container w-full overflow-hidden"><div id="m-row-1" class="marquee-content"></div></div>
                         <div class="marquee-container w-full overflow-hidden"><div id="m-row-2" class="marquee-content"></div></div>
                     </div>
 
                     <div id="stats-container" class="mt-8 transition-all duration-1000 transform opacity-0 translate-y-10">
                         <div class="bg-black/40 border border-[#E5C07B]/40 rounded-[40px] px-16 py-10 backdrop-blur-3xl shadow-2xl flex flex-col items-center">
-                            <span id="stats-label" class="text-xs font-bold uppercase tracking-[0.6em] text-[#E5C07B] mb-6">大會互動集氣能量</span>
+                            <span id="stats-label" class="text-xs font-bold uppercase tracking-[0.6em] text-[#E5C07B] mb-6">今日大會集氣能量</span>
                             <div class="flex items-center gap-8 count-up-container" id="stats-visual">
                                 <svg class="w-16 h-16 fill-[#FF4D4D] drop-shadow-[0_0_15px_rgba(255,77,77,0.6)]" viewBox="0 0 24 24">
                                     <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
@@ -217,7 +212,6 @@
         </div>
     </div>
 
-    <!-- Status Modal -->
     <div id="status-modal" class="fixed inset-0 bg-black/90 backdrop-blur-xl flex items-center justify-center opacity-0 pointer-events-none transition-all z-[100] p-6">
         <div class="glass-panel p-8 rounded-3xl max-w-sm w-full text-center">
             <div id="modal-icon" class="text-5xl mb-4">✨</div>
@@ -244,12 +238,26 @@
         const appId = 'principal-conference-v1';
         let db, auth, user, currentLang = 'zh';
 
+        // 獲取今日日期標籤 (格式: YYYY-MM-DD) 用於每日重新計算
+        const getTodayId = () => new Date().toISOString().split('T')[0];
+
         const i18n = {
-            zh: { hSub: "校長會議", hMain: "凝聚卓越 · 引領創新", welcome: "您的到訪與祝福是我們前進的動力。請完成簽到並為大會集氣點讚！", submit: "確認簽到", success: "簽到成功", successMsg: "您的祝福已同步至大螢幕牆。", like: "為大會點讚", stats: "大會互動集氣能量" },
-            en: { hSub: "Principal Conference", hMain: "Excellence & Innovation", welcome: "Your presence is our motivation. Please sign in and give us a like!", submit: "Sign In", success: "Success", successMsg: "Your blessing is now on the big screen.", like: "Like Event", stats: "Interactive Energy Unit" }
+            zh: { hSub: "科技領導 創新人才 / 知時愛農 健康時尚", hMain: "校長會議：凝聚卓越 · 引領未來", welcome: "點擊下方按鈕，為本次大會注入滿滿的能量與祝福！", submit: "確認簽到", success: "簽到成功", successMsg: "您的祝福已同步至大螢幕牆。", like: "為大會集氣點讚", stats: "今日大會集氣能量" },
+            en: { hSub: "Tech Leadership & Innovation / Seasonal Agriculture & Fashion", hMain: "Principal Conference: Leading the Future", welcome: "Click the button below to inject energy and blessings into the conference!", submit: "Sign In", success: "Success", successMsg: "Your message is now live on the wall.", like: "Boost Energy", stats: "Today's Energy Unit" }
         };
 
-        const quotes = ["科技領導，創新人才 ✨", "數位轉型，教育領航 🚀", "聚焦科技，啟迪智慧 💡", "攜手共創，卓越未來 🌟", "深耕教育，引領新章 📚"];
+        const quotes = [
+            "科技領導，引領教育新風範 🚀", "創新人才，培育未來競爭力 💡", "知時愛農，紮根土地情懷 🌱", "健康時尚，展現校園新美學 🧘", "科技與農業交織，創新無限 🌾", 
+            "以科技驅動創新，以人才引領未來 ✨", "愛農識時，智慧耕耘校園 🌳", "健康生活，時尚校園，卓越領導 🌟", "創新思維，科技賦能教育前瞻 📡", "守護土地，科技領航人才培育 🛡️",
+            "數位轉型，共創教育新巔峰 📈", "科技領導，點亮創新火花 🔥", "健康校園，培育時尚新世代 🎨", "知時愛農，體驗生命教育之美 🍃", "科技人才，創新未來，從我開始 🙋",
+            "領航科技，卓越創新，教育共好 🤝", "時尚健康，校長會議共襄盛舉 🎊", "知時惜物，愛農深耕，共創永續 🌍", "科技領航，創新種子遍地開花 🌸", "多元人才，科技領導，教育共榮 💎",
+            "數位力即競爭力，引領科技校園 💻", "創新人才培育，接軌世界舞台 🗺️", "健康時尚新校園，活力無限 ⚡", "知時愛農，傳承土地的智慧 🍎", "科技引領，教育轉型不設限 🔓",
+            "創新思維，打造卓越科技人才 🛠️", "時尚生活，健康校園，引領風潮 🌊", "知時節，愛農事，深植教育魂 🧡", "科技領導，卓越創新，教育首選 🥇", "跨域人才，科技領航，未來可期 🌈",
+            "科技創新，啟迪學生無限可能 🧠", "健康時尚，校長領航教育之美 🦢", "愛農教育，知時而動，永續發展 ♻️", "領導力轉型，科技與創新並進 ⚙️", "人才匯聚，科技領航，共譜新章 📖",
+            "智慧科技，創新應用，人才卓越 🎖️", "健康時尚，品味校園新生活 ☕", "知時愛農，實踐環境永續美學 🌻", "科技創新，賦予人才新價值 💎", "跨界領導，科技與農業的對話 🗨️",
+            "科技先鋒，創新教育，人才輩出 🎓", "時尚健康，共創幸福校園氛圍 🥰", "知時惜福，愛農耕耘，教育長青 🌲", "科技領航，創新未來，教育新藍圖 🗺️", "卓越領導，人才為本，科技加持 ➕",
+            "創新驅動，科技領導，卓越再現 💫", "時尚健康，校園文化新高度 🏰", "知時愛農，深耕本土，接軌國際 🌏", "科技與人才共舞，創新與未來同行 💃", "校長會議，共創科技創新新紀元 🚀"
+        ];
 
         async function init() {
             createParticles();
@@ -259,21 +267,28 @@
                 db = getFirestore(app);
                 await signInAnonymously(auth);
                 onAuthStateChanged(auth, (u) => { 
-                    if (u) { user = u; document.getElementById('db-status-dot').classList.replace('bg-red-500', 'bg-green-500'); setupSync(); } 
+                    if (u) { 
+                        user = u; 
+                        document.getElementById('db-status-dot').classList.replace('bg-red-500', 'bg-green-500'); 
+                        setupSync(); 
+                    } 
                 });
             } catch (e) { console.error(e); }
         }
 
         function setupSync() {
             if (!user) return;
+            // 監聽簽到資料
             onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'registrations'), (snap) => {
                 const data = snap.docs.map(d => d.data()).sort((a,b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
                 renderWall(data);
             });
-            onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'stats', 'counter'), (snap) => {
+            // 監聽今日計數器 (文件 ID 為今日日期，實現每日歸零)
+            onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'stats', getTodayId()), (snap) => {
                 if (snap.exists()) {
-                    const count = snap.data().likes || 0;
-                    animateCount(count);
+                    animateCount(snap.data().likes || 0);
+                } else {
+                    animateCount(0); // 若今日尚無紀錄，顯示 0
                 }
             });
         }
@@ -282,29 +297,23 @@
             const el = document.getElementById('total-likes');
             const visual = document.getElementById('stats-visual');
             const oldCount = parseInt(el.innerText) || 0;
-            if (newCount === oldCount) return;
-            
+            if (newCount === oldCount && oldCount !== 0) return;
             el.innerText = newCount;
             visual.classList.add('bump');
-            setTimeout(() => visual.classList.remove('bump'), 400);
-            
+            setTimeout(() => visual.classList.remove('bump'), 200);
             const container = document.getElementById('stats-container');
             container.classList.remove('opacity-0', 'translate-y-10');
         }
 
-        // 優化後的點讚處理，防止手勢縮放
         async function handleLike(e) {
-            if (e) {
-                // 防止多觸點手勢
-                if (e.cancelable) e.preventDefault();
-            }
+            if (e && e.cancelable) e.preventDefault();
             if (!user) return;
-            
             spawnHearts(e);
-
             try {
-                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'stats', 'counter'), {
+                // 使用今日日期文件進行遞增
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'stats', getTodayId()), {
                     likes: increment(1),
+                    date: getTodayId(),
                     lastUpdated: serverTimestamp()
                 }, { merge: true });
             } catch (err) { console.error("Like failed", err); }
@@ -313,27 +322,21 @@
         function spawnHearts(e) {
             const btn = document.getElementById('event-like-btn');
             const rect = btn.getBoundingClientRect();
-            
-            // 處理觸控點座標或按鈕中心座標
             let clientX, clientY;
             if (e && e.touches && e.touches[0]) {
-                clientX = e.touches[0].clientX;
-                clientY = e.touches[0].clientY;
+                clientX = e.touches[0].clientX; clientY = e.touches[0].clientY;
             } else if (e && e.clientX) {
-                clientX = e.clientX;
-                clientY = e.clientY;
+                clientX = e.clientX; clientY = e.clientY;
             } else {
-                clientX = rect.left + rect.width / 2;
-                clientY = rect.top + rect.height / 2;
+                clientX = rect.left + rect.width / 2; clientY = rect.top + rect.height / 2;
             }
-
             for (let i = 0; i < 6; i++) {
                 const h = document.createElement('div');
                 h.className = 'heart-particle';
-                h.innerHTML = ['❤️', '✨', '💖', '🔥'][Math.floor(Math.random()*4)];
+                h.innerHTML = ['❤️', '✨', '💖', '🔥', '🌾', '🚀'][Math.floor(Math.random()*6)];
                 h.style.left = clientX + 'px';
                 h.style.top = clientY + 'px';
-                const angle = (Math.random() * Math.PI) + Math.PI; // 向上噴發
+                const angle = (Math.random() * Math.PI) + Math.PI; 
                 const dist = 100 + Math.random() * 150;
                 h.style.setProperty('--tx', `${Math.cos(angle) * dist}px`);
                 h.style.setProperty('--ty', `${Math.sin(angle) * dist}px`);
@@ -360,7 +363,7 @@
             
             r1.innerHTML = r2.innerHTML = '';
             list.forEach((item, idx) => { if (idx % 2 === 0) r1.innerHTML += card(item); else r2.innerHTML += card(item); });
-            if (list.length > 3) { r1.innerHTML += r1.innerHTML; r2.innerHTML += r2.innerHTML; }
+            if (list.length > 2) { r1.innerHTML += r1.innerHTML; r2.innerHTML += r2.innerHTML; }
         }
 
         document.getElementById('guest-form').onsubmit = async (e) => {
@@ -410,7 +413,6 @@
         document.getElementById('show-input-btn').onclick = () => { document.getElementById('input-section').classList.remove('hidden'); document.getElementById('display-section').classList.add('hidden'); document.getElementById('show-input-btn').classList.add('active'); document.getElementById('show-display-btn').classList.remove('active'); };
         document.getElementById('show-display-btn').onclick = () => { document.getElementById('input-section').classList.add('hidden'); document.getElementById('display-section').classList.remove('hidden'); document.getElementById('show-display-btn').classList.add('active'); document.getElementById('show-input-btn').classList.remove('active'); };
         
-        // 使用 pointerdown 以獲得更快的反應速度
         const likeBtn = document.getElementById('event-like-btn');
         likeBtn.addEventListener('pointerdown', handleLike);
 
