@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>校長會議簽到系統 - 互動升級版</title>
+    <title>校長會議簽到系統 - 互動同步版</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -40,10 +40,6 @@
             z-index: 10;
         }
 
-        @media (min-width: 768px) {
-            .projection-canvas { padding: 40px 5%; }
-        }
-
         .glass-panel {
             background: var(--glass-bg);
             backdrop-filter: blur(25px);
@@ -51,21 +47,12 @@
             box-shadow: 0 20px 60px 0 rgba(0, 0, 0, 0.9);
         }
 
-        .nav-btn, .lang-btn { background-color: rgba(255, 255, 255, 0.05); color: #94A3B8; transition: all 0.4s ease; border: 1px solid rgba(255, 255, 255, 0.1); }
-        .nav-btn.active, .lang-btn.active { background: linear-gradient(135deg, var(--primary-gold) 0%, var(--dark-gold) 100%); color: #0A0F1E; border-color: var(--primary-gold); }
+        .nav-btn { background-color: rgba(255, 255, 255, 0.05); color: #94A3B8; transition: all 0.4s ease; border: 1px solid rgba(255, 255, 255, 0.1); }
+        .nav-btn.active { background: linear-gradient(135deg, var(--primary-gold) 0%, var(--dark-gold) 100%); color: #0A0F1E; border-color: var(--primary-gold); }
 
         .submit-btn { background: linear-gradient(135deg, #E5C07B 0%, #B8860B 100%); color: #0A0F1E; font-weight: 700; letter-spacing: 0.2em; cursor: pointer; }
         
-        #event-like-btn {
-            touch-action: manipulation;
-            -webkit-tap-highlight-color: transparent;
-            user-select: none;
-        }
-
-        @keyframes heart-beat {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-        }
+        @keyframes heart-beat { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
         .heart-pulse { animation: heart-beat 1.5s infinite ease-in-out; }
 
         .heart-particle {
@@ -103,13 +90,8 @@
             font-size: 16px !important; 
         }
         
-        .count-up-container {
-            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
         .bump { transform: scale(1.1); color: var(--primary-gold) !important; }
-
         .particle { position: absolute; background: radial-gradient(circle, #E5C07B 0%, transparent 70%); border-radius: 50%; pointer-events: none; opacity: 0.1; animation: float linear infinite; }
-        @keyframes float { 0% { transform: translateY(0) translateX(0); } 50% { transform: translateY(-20px) translateX(10px); } 100% { transform: translateY(0) translateX(0); } }
     </style>
 </head>
 <body>
@@ -119,7 +101,7 @@
         <div class="flex flex-col md:flex-row items-center justify-between gap-4 mb-6 z-50">
             <div class="flex items-center gap-3 bg-black/20 px-4 py-2 rounded-full border border-white/5">
                 <div id="db-status-dot" class="w-2.5 h-2.5 rounded-full bg-red-500"></div>
-                <span class="text-[10px] text-white/40 uppercase tracking-widest">Live Sync Enabled</span>
+                <span id="sync-label" class="text-[10px] text-white/40 uppercase tracking-widest">系統連線中...</span>
             </div>
             
             <div class="flex gap-2">
@@ -127,34 +109,31 @@
                     <button id="show-input-btn" class="nav-btn px-4 py-2 text-xs font-semibold rounded-md active">手機簽到</button>
                     <button id="show-display-btn" class="nav-btn px-4 py-2 text-xs font-semibold rounded-md">大螢幕牆</button>
                 </div>
-                <div class="flex space-x-1 p-1 bg-white/5 backdrop-blur-md rounded-lg border border-white/10">
-                    <button id="lang-zh-btn" class="lang-btn px-3 py-2 text-xs font-semibold rounded-md active">繁中</button>
-                    <button id="lang-en-btn" class="lang-btn px-3 py-2 text-xs font-semibold rounded-md">EN</button>
-                </div>
             </div>
         </div>
 
         <div class="flex flex-col h-full">
             <header class="mb-8 text-center lg:text-left">
-                <div id="header-sub" class="text-sm lg:text-xl font-light tracking-[0.3em] text-[#E5C07B] uppercase mb-2">科技領導 創新人才 / 知時愛農 健康時尚</div>
-                <h1 id="header-main" class="text-2xl lg:text-6xl font-bold tracking-tight text-white border-t-2 border-white/10 pt-4">校長會議：凝聚卓越 · 引領未來</h1>
+                <div class="text-sm lg:text-xl font-light tracking-[0.3em] text-[#E5C07B] uppercase mb-2">科技領導 創新人才 / 知時愛農 健康時尚</div>
+                <h1 class="text-2xl lg:text-6xl font-bold tracking-tight text-white border-t-2 border-white/10 pt-4">校長會議：凝聚卓越 · 引領未來</h1>
             </header>
 
             <main class="flex-grow flex items-center justify-center">
+                <!-- 手機輸入介面 -->
                 <section id="input-section" class="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-5 gap-6 lg:gap-8">
                     <div class="lg:col-span-2 flex flex-col justify-center">
                         <div class="glass-panel p-6 lg:p-8 rounded-3xl border-l-8 border-[#E5C07B]">
                             <h2 class="text-2xl font-light mb-4 text-white uppercase tracking-wider">Join Us</h2>
-                            <p id="welcome-msg" class="text-sm lg:text-base text-gray-400 font-light leading-relaxed mb-6">點擊下方按鈕，為本次大會注入滿滿的能量與祝福！</p>
+                            <p class="text-sm lg:text-base text-gray-400 font-light leading-relaxed mb-6">點擊下方按鈕，為本次大會注入滿滿的能量與祝福！</p>
                             
                             <button type="button" id="event-like-btn" class="relative overflow-hidden w-full bg-white/10 border border-[#E5C07B]/40 rounded-full py-5 flex flex-col items-center justify-center gap-1 transition-all active:scale-95 group shadow-lg">
                                 <div class="flex items-center gap-3">
                                     <svg class="w-8 h-8 fill-[#FF4D4D] group-hover:scale-125 transition-transform duration-300 heart-pulse" viewBox="0 0 24 24">
                                         <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
                                     </svg>
-                                    <span id="like-btn-text" class="text-lg font-bold text-white tracking-widest uppercase">為大會集氣點讚</span>
+                                    <span class="text-lg font-bold text-white tracking-widest uppercase">為大會集氣點讚</span>
                                 </div>
-                                <span class="text-[9px] text-white/40 uppercase tracking-widest">( 無限次集氣 )</span>
+                                <span class="text-[9px] text-white/40 uppercase tracking-widest">( 每日自動歸零 )</span>
                             </button>
                         </div>
                     </div>
@@ -163,46 +142,39 @@
                         <div class="glass-panel p-6 lg:p-8 rounded-3xl">
                             <form id="guest-form" class="space-y-4">
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    <input type="text" id="name" name="name" placeholder="您的姓名" required class="w-full rounded-xl px-4 py-4 text-white">
-                                    <input type="text" id="organization" name="organization" placeholder="服務單位" required class="w-full rounded-xl px-4 py-4 text-white">
+                                    <input type="text" id="name" placeholder="您的姓名" required class="w-full rounded-xl px-4 py-4 text-white">
+                                    <input type="text" id="organization" placeholder="服務單位" required class="w-full rounded-xl px-4 py-4 text-white">
                                 </div>
-                                <input type="text" id="title-field" name="title" placeholder="職稱" required class="w-full rounded-xl px-4 py-4 text-white">
+                                <input type="text" id="title-field" placeholder="職稱" required class="w-full rounded-xl px-4 py-4 text-white">
                                 <div class="relative">
                                     <div class="flex justify-between items-center mb-2">
                                         <label class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">祝福留言</label>
-                                        <button type="button" id="ai-btn" class="bg-sky-500/20 border border-sky-400/50 px-3 py-1.5 rounded-full text-[10px] font-bold text-sky-400 flex items-center gap-1">
-                                            ✨ 靈感產生器
-                                        </button>
+                                        <button type="button" id="ai-btn" class="bg-sky-500/20 border border-sky-400/50 px-3 py-1.5 rounded-full text-[10px] font-bold text-sky-400">✨ 靈感產生器</button>
                                     </div>
-                                    <textarea id="blessing" name="blessing" rows="3" maxlength="100" required class="w-full rounded-xl px-4 py-4 text-white resize-none" placeholder="輸入您的祝福..."></textarea>
-                                    <div id="ai-loader" class="absolute inset-0 bg-black/80 backdrop-blur-sm rounded-xl flex items-center justify-center hidden z-20">
-                                        <div class="w-5 h-5 border-2 border-[#E5C07B] border-t-transparent rounded-full animate-spin"></div>
-                                    </div>
+                                    <textarea id="blessing" rows="3" maxlength="100" required class="w-full rounded-xl px-4 py-4 text-white resize-none" placeholder="輸入您的祝福..."></textarea>
                                 </div>
-                                <button type="submit" id="submit-btn" class="submit-btn w-full py-4 rounded-xl text-lg transition-all active:scale-[0.98]">
-                                    <span id="submit-text">確認簽到</span>
-                                </button>
+                                <button type="submit" id="submit-btn" class="submit-btn w-full py-4 rounded-xl text-lg transition-all active:scale-[0.98]">確認簽到</button>
                             </form>
                         </div>
                     </div>
                 </section>
 
+                <!-- 大螢幕牆介面 -->
                 <section id="display-section" class="hidden w-full h-full flex flex-col items-center justify-center">
                     <div id="marquee-wall" class="w-screen flex flex-col justify-center space-y-8 overflow-hidden py-10">
                         <div class="marquee-container w-full overflow-hidden"><div id="m-row-1" class="marquee-content"></div></div>
                         <div class="marquee-container w-full overflow-hidden"><div id="m-row-2" class="marquee-content"></div></div>
                     </div>
 
-                    <div id="stats-container" class="mt-8 transition-all duration-1000 transform opacity-0 translate-y-10">
+                    <div id="stats-container" class="mt-8">
                         <div class="bg-black/40 border border-[#E5C07B]/40 rounded-[40px] px-16 py-10 backdrop-blur-3xl shadow-2xl flex flex-col items-center">
-                            <span id="stats-label" class="text-xs font-bold uppercase tracking-[0.6em] text-[#E5C07B] mb-6">今日大會集氣能量</span>
-                            <div class="flex items-center gap-8 count-up-container" id="stats-visual">
+                            <span class="text-xs font-bold uppercase tracking-[0.6em] text-[#E5C07B] mb-6">今日大會累計能量</span>
+                            <div class="flex items-center gap-8" id="stats-visual">
                                 <svg class="w-16 h-16 fill-[#FF4D4D] drop-shadow-[0_0_15px_rgba(255,77,77,0.6)]" viewBox="0 0 24 24">
                                     <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
                                 </svg>
                                 <div class="flex items-baseline gap-4">
                                     <span id="total-likes" class="text-9xl font-black text-white tabular-nums tracking-tighter">0</span>
-                                    <span class="text-xl text-white/30 font-light tracking-[0.2em] uppercase">Energy</span>
                                 </div>
                             </div>
                         </div>
@@ -212,12 +184,13 @@
         </div>
     </div>
 
+    <!-- 狀態彈窗 -->
     <div id="status-modal" class="fixed inset-0 bg-black/90 backdrop-blur-xl flex items-center justify-center opacity-0 pointer-events-none transition-all z-[100] p-6">
         <div class="glass-panel p-8 rounded-3xl max-w-sm w-full text-center">
             <div id="modal-icon" class="text-5xl mb-4">✨</div>
             <h3 id="modal-title" class="text-2xl font-bold text-white mb-2">簽到成功</h3>
             <p id="modal-msg" class="text-sm text-gray-400 mb-8 font-light">歡迎進入會場。</p>
-            <button id="close-modal-btn" class="w-full py-4 bg-white/10 text-white font-semibold rounded-xl hover:bg-white/20 transition-all">關閉</button>
+            <button id="close-modal-btn" class="w-full py-4 bg-white/10 text-white font-semibold rounded-xl">關閉</button>
         </div>
     </div>
 
@@ -235,17 +208,13 @@
             appId: "1:655473516916:web:b971f0b7ae005b82558c21"
         };
 
+        const googleSheetUrl = ""; // 請填入 GAS 網址
         const appId = 'principal-conference-v1';
-        let db, auth, user, currentLang = 'zh';
+        let db, auth, user;
 
-        // 獲取今日日期標籤 (格式: YYYY-MM-DD) 用於每日重新計算
-        const getTodayId = () => new Date().toISOString().split('T')[0];
+        const getTodayId = () => new Date().toLocaleDateString('sv-SE'); // YYYY-MM-DD
 
-        const i18n = {
-            zh: { hSub: "科技領導 創新人才 / 知時愛農 健康時尚", hMain: "校長會議：凝聚卓越 · 引領未來", welcome: "點擊下方按鈕，為本次大會注入滿滿的能量與祝福！", submit: "確認簽到", success: "簽到成功", successMsg: "您的祝福已同步至大螢幕牆。", like: "為大會集氣點讚", stats: "今日大會集氣能量" },
-            en: { hSub: "Tech Leadership & Innovation / Seasonal Agriculture & Fashion", hMain: "Principal Conference: Leading the Future", welcome: "Click the button below to inject energy and blessings into the conference!", submit: "Sign In", success: "Success", successMsg: "Your message is now live on the wall.", like: "Boost Energy", stats: "Today's Energy Unit" }
-        };
-
+        // 50 組祝福詞庫
         const quotes = [
             "科技領導，引領教育新風範 🚀", "創新人才，培育未來競爭力 💡", "知時愛農，紮根土地情懷 🌱", "健康時尚，展現校園新美學 🧘", "科技與農業交織，創新無限 🌾", 
             "以科技驅動創新，以人才引領未來 ✨", "愛農識時，智慧耕耘校園 🌳", "健康生活，時尚校園，卓越領導 🌟", "創新思維，科技賦能教育前瞻 📡", "守護土地，科技領航人才培育 🛡️",
@@ -270,163 +239,135 @@
                     if (u) { 
                         user = u; 
                         document.getElementById('db-status-dot').classList.replace('bg-red-500', 'bg-green-500'); 
+                        document.getElementById('sync-label').innerText = "連線成功：實時同步中";
                         setupSync(); 
                     } 
                 });
-            } catch (e) { console.error(e); }
+            } catch (e) { console.error("Init Error:", e); }
         }
 
         function setupSync() {
             if (!user) return;
-            // 監聽簽到資料
+            const today = getTodayId();
+
+            // 1. 監聽簽到資料 (每日重新記錄：僅顯示今日標籤)
             onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'registrations'), (snap) => {
-                const data = snap.docs.map(d => d.data()).sort((a,b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+                const data = snap.docs
+                    .map(d => d.data())
+                    .filter(item => item.dateTag === today) // 每日過濾
+                    .sort((a,b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
                 renderWall(data);
             });
-            // 監聽今日計數器 (文件 ID 為今日日期，實現每日歸零)
-            onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'stats', getTodayId()), (snap) => {
-                if (snap.exists()) {
-                    animateCount(snap.data().likes || 0);
-                } else {
-                    animateCount(0); // 若今日尚無紀錄，顯示 0
-                }
-            });
-        }
 
-        function animateCount(newCount) {
-            const el = document.getElementById('total-likes');
-            const visual = document.getElementById('stats-visual');
-            const oldCount = parseInt(el.innerText) || 0;
-            if (newCount === oldCount && oldCount !== 0) return;
-            el.innerText = newCount;
-            visual.classList.add('bump');
-            setTimeout(() => visual.classList.remove('bump'), 200);
-            const container = document.getElementById('stats-container');
-            container.classList.remove('opacity-0', 'translate-y-10');
+            // 2. 監聽今日計數器 (每日重新計算)
+            onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'stats', today), (snap) => {
+                const count = snap.exists() ? snap.data().likes : 0;
+                animateCount(count);
+            });
         }
 
         async function handleLike(e) {
             if (e && e.cancelable) e.preventDefault();
             if (!user) return;
             spawnHearts(e);
+            const today = getTodayId();
             try {
-                // 使用今日日期文件進行遞增
-                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'stats', getTodayId()), {
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'stats', today), {
                     likes: increment(1),
-                    date: getTodayId(),
+                    date: today,
                     lastUpdated: serverTimestamp()
                 }, { merge: true });
-            } catch (err) { console.error("Like failed", err); }
-        }
-
-        function spawnHearts(e) {
-            const btn = document.getElementById('event-like-btn');
-            const rect = btn.getBoundingClientRect();
-            let clientX, clientY;
-            if (e && e.touches && e.touches[0]) {
-                clientX = e.touches[0].clientX; clientY = e.touches[0].clientY;
-            } else if (e && e.clientX) {
-                clientX = e.clientX; clientY = e.clientY;
-            } else {
-                clientX = rect.left + rect.width / 2; clientY = rect.top + rect.height / 2;
-            }
-            for (let i = 0; i < 6; i++) {
-                const h = document.createElement('div');
-                h.className = 'heart-particle';
-                h.innerHTML = ['❤️', '✨', '💖', '🔥', '🌾', '🚀'][Math.floor(Math.random()*6)];
-                h.style.left = clientX + 'px';
-                h.style.top = clientY + 'px';
-                const angle = (Math.random() * Math.PI) + Math.PI; 
-                const dist = 100 + Math.random() * 150;
-                h.style.setProperty('--tx', `${Math.cos(angle) * dist}px`);
-                h.style.setProperty('--ty', `${Math.sin(angle) * dist}px`);
-                h.style.setProperty('--tr', `${Math.random() * 360}deg`);
-                document.body.appendChild(h);
-                setTimeout(() => h.remove(), 1000);
-            }
-        }
-
-        function renderWall(list) {
-            const r1 = document.getElementById('m-row-1'), r2 = document.getElementById('m-row-2');
-            const wall = document.getElementById('marquee-wall');
-            if (!list.length) { wall.classList.add('hidden'); return; }
-            wall.classList.remove('hidden');
-
-            const card = (i) => `
-                <div class="blessing-card group">
-                    <div class="text-xl lg:text-2xl text-white font-bold mb-3 tracking-wide">"${i.blessing}"</div>
-                    <div class="flex items-center gap-2">
-                        <div class="w-1.5 h-1.5 rounded-full bg-[#E5C07B]"></div>
-                        <div class="text-sm text-[#E5C07B] font-medium tracking-widest">${i.name} · ${i.organization} <span class="opacity-60 text-[10px] ml-2">${i.title}</span></div>
-                    </div>
-                </div>`;
-            
-            r1.innerHTML = r2.innerHTML = '';
-            list.forEach((item, idx) => { if (idx % 2 === 0) r1.innerHTML += card(item); else r2.innerHTML += card(item); });
-            if (list.length > 2) { r1.innerHTML += r1.innerHTML; r2.innerHTML += r2.innerHTML; }
+            } catch (err) { console.error("Like Sync Failed:", err); }
         }
 
         document.getElementById('guest-form').onsubmit = async (e) => {
             e.preventDefault();
             const btn = document.getElementById('submit-btn');
+            const today = getTodayId();
+            const formData = {
+                name: document.getElementById('name').value,
+                organization: document.getElementById('organization').value,
+                title: document.getElementById('title-field').value,
+                blessing: document.getElementById('blessing').value,
+                dateTag: today,
+                timestamp: serverTimestamp()
+            };
+
             btn.disabled = true;
             try {
-                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'registrations'), {
-                    name: document.getElementById('name').value,
-                    organization: document.getElementById('organization').value,
-                    title: document.getElementById('title-field').value,
-                    blessing: document.getElementById('blessing').value,
-                    timestamp: serverTimestamp()
-                });
-                showModal('success', i18n[currentLang].success, i18n[currentLang].successMsg);
+                // 同步至 Firebase
+                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'registrations'), formData);
+                
+                // 同步至 Google Sheet (如有)
+                if (googleSheetUrl) {
+                    fetch(googleSheetUrl, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        body: JSON.stringify(formData)
+                    }).catch(err => console.warn("GAS Sync Failed", err));
+                }
+
+                showModal('簽到成功', '您的祝福已同步至大螢幕牆。');
                 document.getElementById('guest-form').reset();
+            } catch (err) {
+                console.error("Submit Error:", err);
+                showModal('錯誤', '資料傳輸失敗，請稍後再試。');
             } finally { btn.disabled = false; }
         };
 
-        function showModal(type, title, msg) {
-            const m = document.getElementById('status-modal');
-            document.getElementById('modal-title').innerText = title;
-            document.getElementById('modal-msg').innerText = msg;
-            m.classList.remove('opacity-0', 'pointer-events-none');
+        function animateCount(newCount) {
+            const el = document.getElementById('total-likes');
+            const visual = document.getElementById('stats-visual');
+            el.innerText = newCount;
+            visual.classList.add('bump');
+            setTimeout(() => visual.classList.remove('bump'), 200);
         }
 
-        document.getElementById('ai-btn').onclick = () => {
-            const l = document.getElementById('ai-loader');
-            l.classList.remove('hidden');
-            setTimeout(() => {
-                document.getElementById('blessing').value = quotes[Math.floor(Math.random()*quotes.length)];
-                l.classList.add('hidden');
-            }, 600);
-        };
+        function renderWall(list) {
+            const r1 = document.getElementById('m-row-1'), r2 = document.getElementById('m-row-2');
+            if (!list.length) return;
+            const card = (i) => `<div class="blessing-card group"><div class="text-xl lg:text-2xl text-white font-bold mb-3 tracking-wide">"${i.blessing}"</div><div class="flex items-center gap-2"><div class="w-1.5 h-1.5 rounded-full bg-[#E5C07B]"></div><div class="text-sm text-[#E5C07B] font-medium tracking-widest">${i.name} · ${i.organization} <span class="opacity-60 text-[10px] ml-2">${i.title}</span></div></div></div>`;
+            let h1 = '', h2 = '';
+            list.forEach((item, idx) => { if (idx % 2 === 0) h1 += card(item); else h2 += card(item); });
+            r1.innerHTML = h1 + h1; r2.innerHTML = h2 + h2;
+        }
 
-        function updateUI() {
-            const t = i18n[currentLang];
-            document.getElementById('header-sub').innerText = t.hSub;
-            document.getElementById('header-main').innerText = t.hMain;
-            document.getElementById('welcome-msg').innerText = t.welcome;
-            document.getElementById('submit-text').innerText = t.submit;
-            document.getElementById('like-btn-text').innerText = t.like;
-            document.getElementById('stats-label').innerText = t.stats;
+        function spawnHearts(e) {
+            const btn = document.getElementById('event-like-btn');
+            const rect = btn.getBoundingClientRect();
+            const cx = (e.touches ? e.touches[0].clientX : e.clientX) || (rect.left + rect.width / 2);
+            const cy = (e.touches ? e.touches[0].clientY : e.clientY) || (rect.top + rect.height / 2);
+            for (let i = 0; i < 6; i++) {
+                const h = document.createElement('div'); h.className = 'heart-particle';
+                h.innerHTML = ['❤️', '✨', '💖', '🔥', '🚀'][Math.floor(Math.random()*5)];
+                h.style.left = cx + 'px'; h.style.top = cy + 'px';
+                const a = (Math.random() * Math.PI) + Math.PI; const d = 100 + Math.random() * 100;
+                h.style.setProperty('--tx', `${Math.cos(a) * d}px`); h.style.setProperty('--ty', `${Math.sin(a) * d}px`); h.style.setProperty('--tr', `${Math.random() * 360}deg`);
+                document.body.appendChild(h); setTimeout(() => h.remove(), 1000);
+            }
+        }
+
+        function createParticles() {
+            const c = document.getElementById('particle-container');
+            for (let i = 0; i < 15; i++) {
+                const p = document.createElement('div'); p.className = 'particle';
+                p.style.cssText = `width:3px; height:3px; left:${Math.random()*100}%; top:${Math.random()*100}%; animation: float ${Math.random()*5+10}s linear infinite;`;
+                c.appendChild(p);
+            }
+        }
+
+        function showModal(title, msg) {
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-msg').innerText = msg;
+            document.getElementById('status-modal').classList.remove('opacity-0', 'pointer-events-none');
         }
 
         document.getElementById('close-modal-btn').onclick = () => document.getElementById('status-modal').classList.add('opacity-0', 'pointer-events-none');
         document.getElementById('show-input-btn').onclick = () => { document.getElementById('input-section').classList.remove('hidden'); document.getElementById('display-section').classList.add('hidden'); document.getElementById('show-input-btn').classList.add('active'); document.getElementById('show-display-btn').classList.remove('active'); };
         document.getElementById('show-display-btn').onclick = () => { document.getElementById('input-section').classList.add('hidden'); document.getElementById('display-section').classList.remove('hidden'); document.getElementById('show-display-btn').classList.add('active'); document.getElementById('show-input-btn').classList.remove('active'); };
-        
-        const likeBtn = document.getElementById('event-like-btn');
-        likeBtn.addEventListener('pointerdown', handleLike);
+        document.getElementById('event-like-btn').addEventListener('pointerdown', handleLike);
+        document.getElementById('ai-btn').onclick = () => { document.getElementById('blessing').value = quotes[Math.floor(Math.random()*quotes.length)]; };
 
-        document.getElementById('lang-zh-btn').onclick = () => { currentLang='zh'; updateUI(); document.getElementById('lang-zh-btn').classList.add('active'); document.getElementById('lang-en-btn').classList.remove('active'); };
-        document.getElementById('lang-en-btn').onclick = () => { currentLang='en'; updateUI(); document.getElementById('lang-en-btn').classList.add('active'); document.getElementById('lang-zh-btn').classList.remove('active'); };
-
-        function createParticles() {
-            const c = document.getElementById('particle-container');
-            for (let i = 0; i < 20; i++) {
-                const p = document.createElement('div'); p.className = 'particle';
-                p.style.cssText = `width:3px; height:3px; left:${Math.random()*100}%; top:${Math.random()*100}%; animation-duration:${Math.random()*5+10}s;`;
-                c.appendChild(p);
-            }
-        }
         window.onload = init;
     </script>
 </body>
