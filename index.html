@@ -208,13 +208,13 @@
             appId: "1:655473516916:web:b971f0b7ae005b82558c21"
         };
 
-        const googleSheetUrl = ""; // 請填入 GAS 網址
+        // 更新後的 Google Sheet URL
+        const googleSheetUrl = "https://script.google.com/macros/s/AKfycbxF2eAnlVFX6sNg7JRr4WjHcbhg-tnVBpDqUBp3g6BHotaCaVEXV0NAHKemIVuR22BR/exec"; 
         const appId = 'principal-conference-v1';
         let db, auth, user;
 
         const getTodayId = () => new Date().toLocaleDateString('sv-SE'); // YYYY-MM-DD
 
-        // 50 組祝福詞庫
         const quotes = [
             "科技領導，引領教育新風範 🚀", "創新人才，培育未來競爭力 💡", "知時愛農，紮根土地情懷 🌱", "健康時尚，展現校園新美學 🧘", "科技與農業交織，創新無限 🌾", 
             "以科技驅動創新，以人才引領未來 ✨", "愛農識時，智慧耕耘校園 🌳", "健康生活，時尚校園，卓越領導 🌟", "創新思維，科技賦能教育前瞻 📡", "守護土地，科技領航人才培育 🛡️",
@@ -249,17 +249,13 @@
         function setupSync() {
             if (!user) return;
             const today = getTodayId();
-
-            // 1. 監聽簽到資料 (每日重新記錄：僅顯示今日標籤)
             onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'registrations'), (snap) => {
                 const data = snap.docs
                     .map(d => d.data())
-                    .filter(item => item.dateTag === today) // 每日過濾
+                    .filter(item => item.dateTag === today)
                     .sort((a,b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
                 renderWall(data);
             });
-
-            // 2. 監聽今日計數器 (每日重新計算)
             onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'stats', today), (snap) => {
                 const count = snap.exists() ? snap.data().likes : 0;
                 animateCount(count);
@@ -284,6 +280,8 @@
             e.preventDefault();
             const btn = document.getElementById('submit-btn');
             const today = getTodayId();
+            const now = new Date().toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' });
+            
             const formData = {
                 name: document.getElementById('name').value,
                 organization: document.getElementById('organization').value,
@@ -293,21 +291,32 @@
                 timestamp: serverTimestamp()
             };
 
+            // 根據您的 GAS 代碼格式準備資料
+            const sheetData = {
+                time: now,
+                name: formData.name,
+                organization: formData.organization,
+                title: formData.title,
+                blessing: formData.blessing
+            };
+
             btn.disabled = true;
             try {
-                // 同步至 Firebase
+                // 1. 同步至 Firebase
                 await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'registrations'), formData);
                 
-                // 同步至 Google Sheet (如有)
+                // 2. 同步至 Google Sheet
                 if (googleSheetUrl) {
-                    fetch(googleSheetUrl, {
+                    await fetch(googleSheetUrl, {
                         method: 'POST',
                         mode: 'no-cors',
-                        body: JSON.stringify(formData)
-                    }).catch(err => console.warn("GAS Sync Failed", err));
+                        cache: 'no-cache',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(sheetData)
+                    });
                 }
 
-                showModal('簽到成功', '您的祝福已同步至大螢幕牆。');
+                showModal('簽到成功', '您的祝福已同步至雲端與螢幕。');
                 document.getElementById('guest-form').reset();
             } catch (err) {
                 console.error("Submit Error:", err);
