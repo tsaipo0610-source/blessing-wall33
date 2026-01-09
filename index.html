@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>校長會議簽到系統 - 互動同步版</title>
+    <title>114學年度第二學期校長會議 - 互動簽到系統</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -71,24 +71,45 @@
         .blessing-card { 
             display: inline-flex; 
             flex-direction: column;
-            margin: 1rem; 
+            margin: 1.5rem; 
             background: linear-gradient(135deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.08) 100%);
-            padding: 1.5rem 2rem; 
-            border-radius: 20px; 
-            border-left: 8px solid var(--primary-gold);
-            min-width: 320px;
+            padding: 2rem 2.5rem; 
+            border-radius: 24px; 
+            border-left: 10px solid var(--primary-gold);
+            min-width: 450px; 
             position: relative;
             overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
         }
 
-        .marquee-content { display: inline-block; animation: marquee 80s linear infinite; white-space: nowrap; }
+        .marquee-content { display: inline-block; animation: marquee 120s linear infinite; white-space: nowrap; }
         @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
 
-        input, textarea { 
-            background: rgba(255, 255, 255, 0.08) !important; 
-            border: 1px solid rgba(255, 255, 255, 0.2) !important; 
-            color: white !important;
-            font-size: 16px !important; 
+        input, textarea, select { 
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #ffffff;
+            font-size: 16px; 
+        }
+
+        .select-wrapper {
+            position: relative;
+            width: 100%;
+        }
+        .select-wrapper::after {
+            content: '▼';
+            font-size: 10px;
+            color: var(--primary-gold);
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+        }
+
+        select option {
+            background-color: #1a2a4a;
+            color: #ffffff;
         }
         
         .bump { transform: scale(1.1); color: var(--primary-gold) !important; }
@@ -116,11 +137,13 @@
         <div class="flex flex-col h-full">
             <header class="mb-8 text-center lg:text-left">
                 <div class="text-sm lg:text-xl font-light tracking-[0.3em] text-[#E5C07B] uppercase mb-2">科技領導 創新人才 / 知時愛農 健康時尚</div>
-                <h1 class="text-2xl lg:text-6xl font-bold tracking-tight text-white border-t-2 border-white/10 pt-4">校長會議：凝聚卓越 · 引領未來</h1>
+                <h1 class="text-2xl lg:text-6xl font-bold tracking-tight text-white border-t-2 border-white/10 pt-4">
+                    114 學年度第二學期校長會議
+                </h1>
+                <p class="text-xl text-white/60 mt-2 font-light tracking-widest uppercase">凝聚卓越 · 引領未來</p>
             </header>
 
             <main class="flex-grow flex items-center justify-center">
-                <!-- 手機輸入介面 -->
                 <section id="input-section" class="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-5 gap-6 lg:gap-8">
                     <div class="lg:col-span-2 flex flex-col justify-center">
                         <div class="glass-panel p-6 lg:p-8 rounded-3xl border-l-8 border-[#E5C07B]">
@@ -143,16 +166,54 @@
                         <div class="glass-panel p-6 lg:p-8 rounded-3xl">
                             <form id="guest-form" class="space-y-4">
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    <input type="text" id="name" placeholder="您的姓名" required class="w-full rounded-xl px-4 py-4 text-white">
-                                    <input type="text" id="organization" placeholder="服務單位" required class="w-full rounded-xl px-4 py-4 text-white">
+                                    <input type="text" id="name" placeholder="您的姓名" required class="w-full rounded-xl px-4 py-4 text-white outline-none">
+                                    <div class="select-wrapper">
+                                        <select id="district-select" required class="w-full rounded-xl px-4 py-4 text-white bg-white/10 outline-none">
+                                            <option value="" disabled selected>桃園行政區</option>
+                                            <option value="桃園區">桃園區</option>
+                                            <option value="中壢區">中壢區</option>
+                                            <option value="平鎮區">平鎮區</option>
+                                            <option value="八德區">八德區</option>
+                                            <option value="楊梅區">楊梅區</option>
+                                            <option value="蘆竹區">蘆竹區</option>
+                                            <option value="大溪區">大溪區</option>
+                                            <option value="龍潭區">龍潭區</option>
+                                            <option value="龜山區">龜山區</option>
+                                            <option value="大園區">大園區</option>
+                                            <option value="觀音區">觀音區</option>
+                                            <option value="新屋區">新屋區</option>
+                                            <option value="復興區">復興區</option>
+                                            <option value="局端/其他">局端/其他</option>
+                                        </select>
+                                    </div>
                                 </div>
-                                <input type="text" id="title-field" placeholder="職稱" required class="w-full rounded-xl px-4 py-4 text-white">
+                                <input type="text" id="school-name" placeholder="您的學校名稱或單位" required class="w-full rounded-xl px-4 py-4 text-white outline-none">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div class="select-wrapper">
+                                        <select id="organization-select" required class="w-full rounded-xl px-4 py-4 text-white bg-white/10 outline-none">
+                                            <option value="" disabled selected>服務組別</option>
+                                            <option value="教育局">教育局</option>
+                                            <option value="國小組">國小組</option>
+                                            <option value="國中組">國中組</option>
+                                            <option value="貴賓">貴賓</option>
+                                        </select>
+                                    </div>
+                                    <div class="select-wrapper">
+                                        <select id="title-select" required class="w-full rounded-xl px-4 py-4 text-white bg-white/10 outline-none">
+                                            <option value="" disabled selected>職稱</option>
+                                            <option value="校長">校長</option>
+                                            <option value="代理校長">代理校長</option>
+                                            <option value="主任">主任</option>
+                                            <option value="其他">其他...</option>
+                                        </select>
+                                    </div>
+                                </div>
                                 <div class="relative">
                                     <div class="flex justify-between items-center mb-2">
                                         <label class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">祝福留言</label>
                                         <button type="button" id="ai-btn" class="bg-sky-500/20 border border-sky-400/50 px-3 py-1.5 rounded-full text-[10px] font-bold text-sky-400">✨ 靈感產生器</button>
                                     </div>
-                                    <textarea id="blessing" rows="3" maxlength="100" required class="w-full rounded-xl px-4 py-4 text-white resize-none" placeholder="輸入您的祝福..."></textarea>
+                                    <textarea id="blessing" rows="3" maxlength="100" required class="w-full rounded-xl px-4 py-4 text-white resize-none outline-none" placeholder="輸入您的祝福..."></textarea>
                                 </div>
                                 <button type="submit" id="submit-btn" class="submit-btn w-full py-4 rounded-xl text-lg transition-all active:scale-[0.98]">確認簽到</button>
                             </form>
@@ -160,23 +221,19 @@
                     </div>
                 </section>
 
-                <!-- 大螢幕牆介面 -->
                 <section id="display-section" class="hidden w-full h-full flex flex-col items-center justify-center">
-                    <div id="marquee-wall" class="w-screen flex flex-col justify-center space-y-8 overflow-hidden py-10">
+                    <div id="marquee-wall" class="w-screen flex flex-col justify-center space-y-12 overflow-hidden py-10">
                         <div class="marquee-container w-full overflow-hidden"><div id="m-row-1" class="marquee-content"></div></div>
                         <div class="marquee-container w-full overflow-hidden"><div id="m-row-2" class="marquee-content"></div></div>
                     </div>
-
-                    <div id="stats-container" class="mt-8">
-                        <div class="bg-black/40 border border-[#E5C07B]/40 rounded-[40px] px-16 py-10 backdrop-blur-3xl shadow-2xl flex flex-col items-center">
-                            <span class="text-xs font-bold uppercase tracking-[0.6em] text-[#E5C07B] mb-6">今日大會累計能量</span>
-                            <div class="flex items-center gap-8" id="stats-visual">
-                                <svg class="w-16 h-16 fill-[#FF4D4D] drop-shadow-[0_0_15px_rgba(255,77,77,0.6)]" viewBox="0 0 24 24">
+                    <div id="stats-container" class="mt-12">
+                        <div class="bg-black/40 border border-[#E5C07B]/40 rounded-[50px] px-24 py-12 backdrop-blur-3xl shadow-2xl flex flex-col items-center">
+                            <span class="text-lg font-bold uppercase tracking-[0.8em] text-[#E5C07B] mb-8">今日大會累計能量</span>
+                            <div class="flex items-center gap-12" id="stats-visual">
+                                <svg class="w-24 h-24 fill-[#FF4D4D] drop-shadow-[0_0_25px_rgba(255,77,77,0.7)]" viewBox="0 0 24 24">
                                     <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
                                 </svg>
-                                <div class="flex items-baseline gap-4">
-                                    <span id="total-likes" class="text-9xl font-black text-white tabular-nums tracking-tighter">0</span>
-                                </div>
+                                <span id="total-likes" class="text-[12rem] font-black text-white tabular-nums tracking-tighter leading-none">0</span>
                             </div>
                         </div>
                     </div>
@@ -185,12 +242,11 @@
         </div>
     </div>
 
-    <!-- 狀態彈窗 -->
     <div id="status-modal" class="fixed inset-0 bg-black/90 backdrop-blur-xl flex items-center justify-center opacity-0 pointer-events-none transition-all z-[100] p-6">
         <div class="glass-panel p-8 rounded-3xl max-w-sm w-full text-center">
             <div id="modal-icon" class="text-5xl mb-4">✨</div>
             <h3 id="modal-title" class="text-2xl font-bold text-white mb-2">簽到成功</h3>
-            <p id="modal-msg" class="text-sm text-gray-400 mb-8 font-light">歡迎進入會場。</p>
+            <p id="modal-msg" class="text-sm text-gray-400 mb-8 font-light"></p>
             <button id="close-modal-btn" class="w-full py-4 bg-white/10 text-white font-semibold rounded-xl">關閉</button>
         </div>
     </div>
@@ -198,7 +254,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, doc, updateDoc, increment, setDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, doc, increment, setDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAY2u8kg2H1MnmqDHOcOMIiod4kYJhY4oE",
@@ -209,24 +265,27 @@
             appId: "1:655473516916:web:b971f0b7ae005b82558c21"
         };
 
-        const googleSheetUrl = "https://script.google.com/macros/s/AKfycbxF2eAnlVFX6sNg7JRr4WjHcbhg-tnVBpDqUBp3g6BHotaCaVEXV0NAHKemIVuR22BR/exec"; 
+        const googleSheetUrl = "https://script.google.com/macros/s/AKfycbxF2eAnlVFX6sNg7JRr4WjHcbhg-tnVBpDqUBp3g6BHotaCaVEXV0NAHKemIVuR22BR/exec";
         const appId = 'principal-conference-v1';
         let db, auth, user = null;
 
-        // 輔助函式：取得今日日期 ID (YYYY-MM-DD)
         const getTodayId = () => new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Taipei' });
-
+        
+        // 擴展至 50 組專業祝福語庫
         const quotes = [
-            "科技領導，引領教育新風範 🚀", "創新人才，培育未來競爭力 💡", "知時愛農，紮根土地情懷 🌱", "健康時尚，展現校園新美學 🧘", "科技與農業交織，創新無限 🌾", 
-            "以科技驅動創新，以人才引領未來 ✨", "愛農識時，智慧耕耘校園 🌳", "健康生活，時尚校園，卓越領導 🌟", "創新思維，科技賦能教育前瞻 📡", "守護土地，科技領航人才培育 🛡️",
-            "數位轉型，共創教育新巔峰 📈", "點亮教育火花，科技領航未來 🔥", "健康校園，培育時尚新世代 🎨", "知時愛農，體驗生命教育之美 🍃", "科技人才，創新未來，從我開始 🙋",
-            "領航科技，卓越創新，教育共好 🤝", "時尚健康，校長會議共襄盛舉 🎊", "知時惜物，愛農深耕，共創永續 🌍", "科技領航，創新種子遍地開花 🌸", "多元人才，科技領導，教育共榮 💎",
-            "數位力即競爭力，引領科技校園 💻", "創新人才培育，接軌世界舞台 🗺️", "健康時尚新校園，活力無限 ⚡", "傳承土地智慧，啟發科技新思維 🍎", "科技引領，教育轉型不設限 🔓",
-            "打造卓越科技人才，共創校園新頁 🛠️", "時尚生活，健康校園，領航風潮 🌊", "知時節，愛農事，深植教育靈魂 🧡", "科技領導，卓越創新，教育首選 🥇", "跨域人才，科技領航，未來可期 🌈",
-            "智慧校園，科技領航，教育永續 🏛️", "育才無國界，科技領先機 🌐", "農情教育，科技生活，時尚領航 🌻", "創新教育模式，科技領導先鋒 🚀", "健康教育新主張，時尚領航新視界 🔭",
-            "紮根科技，創新未來，成就學子 🎯", "愛農心，科技情，校長會議聚菁英 💠", "領航新教育，科技創奇蹟 🪄", "時尚校園魅力，科技領導活力 🔋", "知時惜時，愛農愛學，共創共好 🍀",
-            "科技賦能，創新領航，教育升級 ⬆️", "卓越領導，科技先行，人才輩出 🎓", "健康時尚校園，科技創新生活 🧥", "愛農識時，科技領路，深耕教育 🚜", "科技人才搖籃，創新未來殿堂 🏛️",
-            "數位領航，教育轉骨，科技創新 🐲", "時尚校園心，科技領導力 🦁", "知時愛農情，科技創未來 🦋", "科技領航員，教育建築師 🏗️", "創新不息，科技領航，卓越教育 ♾️"
+            "科技領導，引領教育新風範 🚀", "創新人才，培育未來競爭力 💡", "知時愛農，紮根土地情懷 🌱", "健康時尚，展現校園新美學 🧘",
+            "教育領航，共創桃園新願景 🏆", "智慧轉型，開啟學習無限可能 ✨", "卓越領導，深耕校園文化底蘊 📚", "全人教育，啟發孩子多元天賦 🌈",
+            "永續校園，建構安全學習環境 🏫", "跨域整合，接軌國際教育脈動 🌏", "校長聚力，點亮桃園教育之光 🕯️", "心繫學子，守護每個成長夢想 💖",
+            "前瞻規劃，厚植學校數位競爭力 💻", "行政支援，精進教學專業品質 🎯", "社區共好，連結在地資源網絡 🤝", "美感教育，提升校園人文素養 🎨",
+            "品格第一，涵養孩子寬廣胸襟 ⚓", "雙語接軌，拓展學生全球視野 🌐", "適性揚才，支持每位多元學習者 🦋", "凝聚共識，打造學校品牌特色 🥇",
+            "翻轉教育，激發學子主動學習力 ⚡", "幸福校園，讓愛在教育中流動 💗", "教育紮根，培育跨世代卓越人才 🎋", "科技賦能，優化智慧教育場域 📡",
+            "環境教育，與大自然共生共榮 🍀", "多元共融，營造友善校園文化 🫂", "專業領航，引領教學卓越團隊 🧗", "深耕閱讀，開啟學子智慧之窗 📖",
+            "生命教育，探索自我無限價值 🧬", "國際教育，培養全球公民素養 🗺️", "美力桃園，型塑校園生活美學 💎", "創新教學，啟發孩子的好奇心 🔍",
+            "卓越行政，厚植校務治理效能 🏛️", "愛與榜樣，引領學子邁向卓越 🕯️", "智慧校園，連結數據與教育溫度 📊", "永續未來，紮根環境與社會責任 🌍",
+            "教育無他，唯愛與榜樣而已 💞", "跨域共學，打破學習的藩籬 🧩", "創意校園，點燃孩子的想像力 🏮", "自信成長，支持學子勇於追夢 ⛵",
+            "教育共好，攜手親師生穩定前行 🎡", "專業對話，激盪教學無限火花 💥", "前瞻教育，迎接未來挑戰 🛡️", "快樂學習，享受成長的每一刻 🎈",
+            "五育並進，培育健全人格發展 🎖️", "智慧領航，開創教育數位新紀元 🖲️", "紮根在地，連結全球卓越教育 🗺️", "校園安全，守護師生幸福堡壘 🏰",
+            "跨越巔峰，帶領校園邁向卓越 ⛰️", "凝聚能量，共創桃園教育新篇章 🖋️"
         ];
 
         async function init() {
@@ -235,139 +294,103 @@
                 const app = initializeApp(firebaseConfig);
                 auth = getAuth(app);
                 db = getFirestore(app);
-                
                 await signInAnonymously(auth);
-                
                 onAuthStateChanged(auth, (u) => { 
                     if (u) { 
                         user = u; 
                         document.getElementById('db-status-dot').classList.replace('bg-red-500', 'bg-green-500'); 
                         document.getElementById('sync-label').innerText = "連線成功：資料庫實時同步中";
                         setupSync(); 
-                    } else {
-                        document.getElementById('db-status-dot').classList.replace('bg-green-500', 'bg-red-500');
-                        document.getElementById('sync-label').innerText = "連線中斷，請檢查網路";
                     }
                 });
-            } catch (e) { 
-                console.error("Firebase Init Error:", e); 
-            }
+            } catch (e) { console.error("Firebase Init Error:", e); }
         }
 
         function setupSync() {
             if (!user) return;
-            
-            // 1. 監聽簽到列表 (全期累計)
             const registrationsCol = collection(db, 'artifacts', appId, 'public', 'data', 'registrations');
             onSnapshot(registrationsCol, (snap) => {
-                const data = snap.docs
-                    .map(d => d.data())
-                    .sort((a,b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+                const data = snap.docs.map(d => d.data()).sort((a,b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
                 renderWall(data);
-            }, (err) => console.error("Registrations sync error:", err));
-
-            // 2. 監聽讚數 (每日重置路徑)
+            });
             const statsDoc = doc(db, 'artifacts', appId, 'public', 'data', 'stats', `stats-${getTodayId()}`);
             onSnapshot(statsDoc, (snap) => {
                 const count = snap.exists() ? snap.data().likes : 0;
                 animateCount(count);
-            }, (err) => console.error("Stats sync error:", err));
-        }
-
-        async function handleLike(e) {
-            if (e && e.cancelable) e.preventDefault();
-            if (!user) return;
-            spawnHearts(e);
-            try {
-                // 讚數寫入今日專屬文件
-                const statsRef = doc(db, 'artifacts', appId, 'public', 'data', 'stats', `stats-${getTodayId()}`);
-                await setDoc(statsRef, {
-                    likes: increment(1),
-                    date: getTodayId(),
-                    lastUpdated: serverTimestamp()
-                }, { merge: true });
-            } catch (err) { console.error("Like Error:", err); }
+            });
         }
 
         document.getElementById('guest-form').onsubmit = async (e) => {
             e.preventDefault();
             if (!user) return;
-
             const btn = document.getElementById('submit-btn');
             const now = new Date().toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' });
-            
             const formData = {
                 name: document.getElementById('name').value,
-                organization: document.getElementById('organization').value,
-                title: document.getElementById('title-field').value,
+                district: document.getElementById('district-select').value,
+                school: document.getElementById('school-name').value,
+                organization: document.getElementById('organization-select').value,
+                title: document.getElementById('title-select').value,
                 blessing: document.getElementById('blessing').value,
                 timestamp: serverTimestamp(),
-                dateTag: getTodayId(), // 保留日期標記以便後續分析
+                dateTag: getTodayId(),
                 uid: user.uid
             };
-
-            const sheetData = {
-                time: now,
-                name: formData.name,
-                organization: formData.organization,
-                title: formData.title,
-                blessing: formData.blessing
-            };
-
             btn.disabled = true;
             try {
                 const registrationsRef = collection(db, 'artifacts', appId, 'public', 'data', 'registrations');
                 await addDoc(registrationsRef, formData);
-                
                 if (googleSheetUrl) {
-                    fetch(googleSheetUrl, {
-                        method: 'POST',
-                        mode: 'no-cors',
-                        cache: 'no-cache',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(sheetData)
-                    }).catch(err => console.error("Sheet error:", err));
+                    fetch(googleSheetUrl, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ time: now, ...formData }) });
                 }
-
                 showModal('簽到成功', '您的祝福已成功同步至牆面！');
                 document.getElementById('guest-form').reset();
-            } catch (err) {
-                console.error("Firebase Sync Error:", err);
-            } finally { 
-                btn.disabled = false; 
-            }
+            } catch (err) { console.error(err); } finally { btn.disabled = false; }
         };
 
         function animateCount(newCount) {
             const el = document.getElementById('total-likes');
             const visual = document.getElementById('stats-visual');
             if (el) el.innerText = newCount;
-            if (visual) {
-                visual.classList.add('bump');
-                setTimeout(() => visual.classList.remove('bump'), 200);
-            }
+            if (visual) { visual.classList.add('bump'); setTimeout(() => visual.classList.remove('bump'), 200); }
         }
 
         function renderWall(list) {
             const r1 = document.getElementById('m-row-1'), r2 = document.getElementById('m-row-2');
-            if (!list || !list.length || !r1 || !r2) return;
-            const card = (i) => `<div class="blessing-card group"><div class="text-xl lg:text-2xl text-white font-bold mb-3 tracking-wide">"${i.blessing}"</div><div class="flex items-center gap-2"><div class="w-1.5 h-1.5 rounded-full bg-[#E5C07B]"></div><div class="text-sm text-[#E5C07B] font-medium tracking-widest">${i.name} · ${i.organization} <span class="opacity-60 text-[10px] ml-2">${i.title}</span></div></div></div>`;
+            if (!r1 || !r2) return;
+            const card = (i) => `
+                <div class="blessing-card">
+                    <div class="text-2xl text-white font-medium mb-5 leading-relaxed">"${i.blessing}"</div>
+                    <div class="flex flex-col gap-1">
+                        <div class="text-4xl text-white font-bold tracking-wide">${i.name}</div>
+                        <div class="text-2xl text-[#E5C07B] font-bold mt-2 uppercase tracking-wider">
+                            <span class="bg-white/10 px-3 py-1 rounded-lg mr-2">[${i.district}]</span> ${i.school}
+                        </div>
+                        <div class="text-xl text-white/50 font-semibold mt-1">${i.title} · ${i.organization}</div>
+                    </div>
+                </div>`;
             let h1 = '', h2 = '';
             list.forEach((item, idx) => { if (idx % 2 === 0) h1 += card(item); else h2 += card(item); });
             r1.innerHTML = h1 + h1; r2.innerHTML = h2 + h2;
         }
 
+        async function handleLike(e) {
+            if (e && e.cancelable) e.preventDefault();
+            if (!user) return;
+            spawnHearts(e);
+            const statsRef = doc(db, 'artifacts', appId, 'public', 'data', 'stats', `stats-${getTodayId()}`);
+            await setDoc(statsRef, { likes: increment(1), date: getTodayId() }, { merge: true });
+        }
+
         function spawnHearts(e) {
             const btn = document.getElementById('event-like-btn');
-            if (!btn) return;
             const rect = btn.getBoundingClientRect();
             const cx = (e.touches ? e.touches[0].clientX : e.clientX) || (rect.left + rect.width / 2);
             const cy = (e.touches ? e.touches[0].clientY : e.clientY) || (rect.top + rect.height / 2);
             for (let i = 0; i < 6; i++) {
                 const h = document.createElement('div'); h.className = 'heart-particle';
-                h.innerHTML = ['❤️', '✨', '💖', '🔥', '🚀'][Math.floor(Math.random()*5)];
-                h.style.left = cx + 'px'; h.style.top = cy + 'px';
-                const a = (Math.random() * Math.PI) + Math.PI; const d = 100 + Math.random() * 100;
+                h.innerHTML = '❤️'; h.style.left = cx + 'px'; h.style.top = cy + 'px';
+                const a = (Math.random() * Math.PI) + Math.PI; const d = 150 + Math.random() * 100;
                 h.style.setProperty('--tx', `${Math.cos(a) * d}px`); h.style.setProperty('--ty', `${Math.sin(a) * d}px`); h.style.setProperty('--tr', `${Math.random() * 360}deg`);
                 document.body.appendChild(h); setTimeout(() => h.remove(), 1000);
             }
@@ -375,19 +398,17 @@
 
         function createParticles() {
             const c = document.getElementById('particle-container');
-            if (!c) return;
-            for (let i = 0; i < 15; i++) {
+            for (let i = 0; i < 20; i++) {
                 const p = document.createElement('div'); p.className = 'particle';
-                p.style.cssText = `width:3px; height:3px; left:${Math.random()*100}%; top:${Math.random()*100}%; animation: float ${Math.random()*5+10}s linear infinite;`;
+                p.style.cssText = `width:4px; height:4px; left:${Math.random()*100}%; top:${Math.random()*100}%; animation: float ${Math.random()*5+15}s linear infinite;`;
                 c.appendChild(p);
             }
         }
 
         function showModal(title, msg) {
-            const t = document.getElementById('modal-title'), m = document.getElementById('modal-msg'), modal = document.getElementById('status-modal');
-            if (t) t.innerText = title;
-            if (m) m.innerText = msg;
-            if (modal) modal.classList.remove('opacity-0', 'pointer-events-none');
+            document.getElementById('modal-title').innerText = title; 
+            document.getElementById('modal-msg').innerText = msg;
+            document.getElementById('status-modal').classList.remove('opacity-0', 'pointer-events-none');
         }
 
         document.getElementById('close-modal-btn').onclick = () => document.getElementById('status-modal').classList.add('opacity-0', 'pointer-events-none');
