@@ -166,7 +166,6 @@
                         <div class="glass-panel p-6 lg:p-8 rounded-3xl">
                             <form id="guest-form" class="space-y-4">
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    <input type="text" id="name" placeholder="您的姓名" required class="w-full rounded-xl px-4 py-4 text-white outline-none">
                                     <div class="select-wrapper">
                                         <select id="district-select" required class="w-full rounded-xl px-4 py-4 text-white bg-white/10 outline-none">
                                             <option value="" disabled selected>桃園行政區</option>
@@ -186,18 +185,18 @@
                                             <option value="局端/其他">局端/其他</option>
                                         </select>
                                     </div>
-                                </div>
-                                <input type="text" id="school-name" placeholder="您的學校名稱或單位" required class="w-full rounded-xl px-4 py-4 text-white outline-none">
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div class="select-wrapper">
                                         <select id="organization-select" required class="w-full rounded-xl px-4 py-4 text-white bg-white/10 outline-none">
                                             <option value="" disabled selected>服務組別</option>
                                             <option value="教育局">教育局</option>
                                             <option value="國小組">國小組</option>
                                             <option value="國中組">國中組</option>
+                                            <option value="高中組">高中組</option>
                                             <option value="貴賓">貴賓</option>
                                         </select>
                                     </div>
+                                </div>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div class="select-wrapper">
                                         <select id="title-select" required class="w-full rounded-xl px-4 py-4 text-white bg-white/10 outline-none">
                                             <option value="" disabled selected>職稱</option>
@@ -207,7 +206,9 @@
                                             <option value="貴賓">貴賓</option>
                                         </select>
                                     </div>
+                                    <input type="text" id="name" placeholder="您的姓名" required class="w-full rounded-xl px-4 py-4 text-white outline-none">
                                 </div>
+                                <input type="text" id="school-name" placeholder="您的學校名稱或單位" required class="w-full rounded-xl px-4 py-4 text-white outline-none">
                                 <div class="relative">
                                     <div class="flex justify-between items-center mb-2">
                                         <label class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">祝福留言</label>
@@ -271,7 +272,6 @@
 
         const getTodayId = () => new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Taipei' });
         
-        // 擴展至 50 組專業祝福語庫
         const quotes = [
             "科技領導，引領教育新風範 🚀", "創新人才，培育未來競爭力 💡", "知時愛農，紮根土地情懷 🌱", "健康時尚，展現校園新美學 🧘",
             "教育領航，共創桃園新願景 🏆", "智慧轉型，開啟學習無限可能 ✨", "卓越領導，深耕校園文化底蘊 📚", "全人教育，啟發孩子多元天賦 🌈",
