@@ -56,7 +56,6 @@
         @keyframes heart-beat { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
         .heart-pulse { animation: heart-beat 1.5s infinite ease-in-out; }
 
-        /* AI 按鈕閃爍特效 */
         @keyframes ai-pulse {
             0% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.4); }
             70% { box-shadow: 0 0 0 15px rgba(56, 189, 248, 0); }
@@ -76,21 +75,115 @@
             100% { transform: translate(var(--tx), var(--ty)) scale(1.5) rotate(var(--tr)); opacity: 0; }
         }
 
+        /* 留言牆動畫強化 */
         .blessing-card { 
             display: inline-flex; 
             flex-direction: column;
-            margin: 1.5rem; 
-            background: linear-gradient(135deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.08) 100%);
-            padding: 2rem 2.5rem; 
-            border-radius: 24px; 
-            border-left: 10px solid var(--primary-gold);
-            min-width: 450px; 
+            margin: 2.5rem; 
+            background: linear-gradient(165deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.02) 100%);
+            backdrop-filter: blur(25px);
+            padding: 2.5rem 3rem; 
+            border-radius: 40px; 
+            border: 1px solid rgba(229, 192, 123, 0.2);
+            min-width: 550px; 
+            max-width: 600px;
             position: relative;
             overflow: hidden;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+            box-shadow: 0 30px 80px rgba(0,0,0,0.6);
+            white-space: normal;
+            /* 進場動畫 */
+            animation: card-reveal 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
         }
 
-        .marquee-content { display: inline-block; animation: marquee 120s linear infinite; white-space: nowrap; }
+        /* 流光邊框效果 */
+        .blessing-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 4px;
+            background: linear-gradient(90deg, transparent, var(--primary-gold), transparent);
+            animation: border-flow 4s infinite linear;
+        }
+
+        @keyframes border-flow {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        @keyframes card-reveal {
+            from { opacity: 0; transform: scale(0.8) translateY(30px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .district-badge {
+            display: inline-block;
+            background: rgba(229, 192, 123, 0.15);
+            color: var(--primary-gold);
+            padding: 4px 16px;
+            border-radius: 100px;
+            font-size: 1rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            margin-bottom: 1.5rem;
+            border: 1px solid rgba(229, 192, 123, 0.3);
+            text-shadow: 0 0 10px rgba(229, 192, 123, 0.5);
+        }
+
+        .blessing-text {
+            font-size: 2.8rem;
+            color: #ffffff;
+            font-weight: 500;
+            line-height: 1.4;
+            margin-bottom: 2rem;
+            position: relative;
+            /* 文字輕微浮動 */
+            animation: text-float 5s ease-in-out infinite;
+        }
+
+        @keyframes text-float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        .card-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 1.5rem;
+            margin-top: auto;
+        }
+
+        .author-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .author-name {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #fff;
+            display: flex;
+            align-items: baseline;
+            gap: 12px;
+        }
+
+        .author-title {
+            font-size: 1.2rem;
+            color: rgba(255,255,255,0.4);
+            font-weight: 300;
+        }
+
+        .school-info {
+            font-size: 1.4rem;
+            color: var(--primary-gold);
+            font-weight: 500;
+            letter-spacing: 1px;
+            margin-top: 6px;
+            opacity: 0.9;
+        }
+
+        .marquee-content { display: inline-block; animation: marquee 140s linear infinite; white-space: nowrap; }
         @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
 
         input, textarea, select { 
@@ -100,34 +193,37 @@
             font-size: 16px; 
         }
 
-        .select-wrapper {
-            position: relative;
-            width: 100%;
-        }
+        .select-wrapper { position: relative; width: 100%; }
         .select-wrapper::after {
-            content: '▼';
-            font-size: 10px;
-            color: var(--primary-gold);
-            position: absolute;
-            right: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            pointer-events: none;
+            content: '▼'; font-size: 10px; color: var(--primary-gold);
+            position: absolute; right: 15px; top: 50%; transform: translateY(-50%); pointer-events: none;
         }
 
-        select option {
-            background-color: #1a2a4a;
-            color: #ffffff;
-        }
+        select option { background-color: #1a2a4a; color: #ffffff; }
+        .bump { transform: scale(1.15); color: var(--primary-gold) !important; }
         
-        .bump { transform: scale(1.1); color: var(--primary-gold) !important; }
-        .particle { position: absolute; background: radial-gradient(circle, #E5C07B 0%, transparent 70%); border-radius: 50%; pointer-events: none; opacity: 0.1; animation: float linear infinite; }
+        /* 粒子動畫增強 */
+        .particle { 
+            position: absolute; 
+            background: radial-gradient(circle, #E5C07B 0%, transparent 70%); 
+            border-radius: 50%; 
+            pointer-events: none; 
+            opacity: 0.15; 
+            filter: blur(1px);
+        }
+        @keyframes float-complex {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            33% { transform: translate(30px, -50px) rotate(120deg); }
+            66% { transform: translate(-20px, -100px) rotate(240deg); }
+            100% { transform: translate(0, -150px) rotate(360deg); opacity: 0; }
+        }
     </style>
 </head>
 <body>
-    <div id="particle-container" class="absolute inset-0 z-0"></div>
+    <div id="particle-container" class="absolute inset-0 z-0 pointer-events-none"></div>
 
     <div class="projection-canvas">
+        <!-- 導航與狀態列 -->
         <div class="flex flex-col md:flex-row items-center justify-between gap-4 mb-6 z-50">
             <div class="flex items-center gap-3 bg-black/20 px-4 py-2 rounded-full border border-white/5">
                 <div id="db-status-dot" class="w-2.5 h-2.5 rounded-full bg-red-500"></div>
@@ -152,6 +248,7 @@
             </header>
 
             <main class="flex-grow flex items-center justify-center">
+                <!-- 手機簽到區 -->
                 <section id="input-section" class="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-5 gap-6 lg:gap-8">
                     <div class="lg:col-span-2 flex flex-col justify-center">
                         <div class="glass-panel p-6 lg:p-8 rounded-3xl border-l-8 border-[#E5C07B]">
@@ -159,7 +256,7 @@
                             <p class="text-sm lg:text-base text-gray-400 font-light leading-relaxed mb-6">點擊下方按鈕，為大會注入今日的能量！</p>
                             
                             <button type="button" id="event-like-btn" class="relative overflow-hidden w-full bg-white/10 border border-[#E5C07B]/40 rounded-full py-5 flex flex-col items-center justify-center gap-1 transition-all active:scale-95 group shadow-lg">
-                                <div class="flex items-center gap-3">
+                                <div class="flex items-center gap-3 pointer-events-none">
                                     <svg class="w-8 h-8 fill-[#FF4D4D] group-hover:scale-125 transition-transform duration-300 heart-pulse" viewBox="0 0 24 24">
                                         <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
                                     </svg>
@@ -177,30 +274,18 @@
                                     <div class="select-wrapper">
                                         <select id="district-select" required class="w-full rounded-xl px-4 py-4 text-white bg-white/10 outline-none">
                                             <option value="" disabled selected>桃園行政區</option>
-                                            <option value="桃園區">桃園區</option>
-                                            <option value="中壢區">中壢區</option>
-                                            <option value="平鎮區">平鎮區</option>
-                                            <option value="八德區">八德區</option>
-                                            <option value="楊梅區">楊梅區</option>
-                                            <option value="蘆竹區">蘆竹區</option>
-                                            <option value="大溪區">大溪區</option>
-                                            <option value="龍潭區">龍潭區</option>
-                                            <option value="龜山區">龜山區</option>
-                                            <option value="大園區">大園區</option>
-                                            <option value="觀音區">觀音區</option>
-                                            <option value="新屋區">新屋區</option>
-                                            <option value="復興區">復興區</option>
-                                            <option value="局端/其他">局端/其他</option>
+                                            <option value="桃園區">桃園區</option><option value="中壢區">中壢區</option><option value="平鎮區">平鎮區</option>
+                                            <option value="八德區">八德區</option><option value="楊梅區">楊梅區</option><option value="蘆竹區">蘆竹區</option>
+                                            <option value="大溪區">大溪區</option><option value="龍潭區">龍潭區</option><option value="龜山區">龜山區</option>
+                                            <option value="大園區">大園區</option><option value="觀音區">觀音區</option><option value="新屋區">新屋區</option>
+                                            <option value="復興區">復興區</option><option value="局端/其他">局端/其他</option>
                                         </select>
                                     </div>
                                     <div class="select-wrapper">
                                         <select id="organization-select" required class="w-full rounded-xl px-4 py-4 text-white bg-white/10 outline-none">
                                             <option value="" disabled selected>服務組別</option>
-                                            <option value="教育局">教育局</option>
-                                            <option value="國小組">國小組</option>
-                                            <option value="國中組">國中組</option>
-                                            <option value="高中組">高中組</option>
-                                            <option value="貴賓">貴賓</option>
+                                            <option value="教育局">教育局</option><option value="國小組">國小組</option><option value="國中組">國中組</option>
+                                            <option value="高中組">高中組</option><option value="貴賓">貴賓</option>
                                         </select>
                                     </div>
                                 </div>
@@ -208,10 +293,7 @@
                                     <div class="select-wrapper">
                                         <select id="title-select" required class="w-full rounded-xl px-4 py-4 text-white bg-white/10 outline-none">
                                             <option value="" disabled selected>職稱</option>
-                                            <option value="校長">校長</option>
-                                            <option value="代理校長">代理校長</option>
-                                            <option value="主任">主任</option>
-                                            <option value="貴賓">貴賓</option>
+                                            <option value="校長">校長</option><option value="代理校長">代理校長</option><option value="主任">主任</option><option value="貴賓">貴賓</option>
                                         </select>
                                     </div>
                                     <input type="text" id="name" placeholder="您的姓名" required class="w-full rounded-xl px-4 py-4 text-white outline-none">
@@ -219,34 +301,33 @@
                                 <input type="text" id="school-name" placeholder="您的學校名稱或單位" required class="w-full rounded-xl px-4 py-4 text-white outline-none">
                                 
                                 <div class="relative space-y-3">
-                                    <!-- 靈感產生器：加大按鈕 -->
-                                    <button type="button" id="ai-btn" class="ai-active-glow w-full bg-sky-600/30 border-2 border-sky-400/60 py-4 rounded-xl flex items-center justify-center gap-3 transition-all active:scale-95 group shadow-[0_0_20px_rgba(56,189,248,0.2)]">
+                                    <button type="button" id="ai-btn" class="ai-active-glow w-full bg-sky-600/30 border-2 border-sky-400/60 py-4 rounded-xl flex items-center justify-center gap-3 transition-all active:scale-95 group">
                                         <span class="text-xl group-hover:rotate-12 transition-transform">✨</span>
                                         <span class="text-base font-bold text-sky-100 tracking-[0.2em]">靈感產生器 (AI 推薦語句)</span>
                                     </button>
-                                    
-                                    <textarea id="blessing" rows="3" maxlength="100" required class="w-full rounded-xl px-4 py-4 text-white resize-none outline-none border-white/20 focus:border-sky-400 transition-colors" placeholder="點擊上方靈感產生器，或輸入您的祝福..."></textarea>
+                                    <textarea id="blessing" rows="3" maxlength="100" required class="w-full rounded-xl px-4 py-4 text-white resize-none outline-none border-white/20 focus:border-sky-400 transition-colors" placeholder="輸入您的祝福..."></textarea>
                                 </div>
                                 
-                                <button type="submit" id="submit-btn" class="submit-btn w-full py-5 rounded-xl text-xl transition-all active:scale-[0.98] shadow-lg mt-2">確認簽到</button>
+                                <button type="submit" id="submit-btn" class="submit-btn w-full py-5 rounded-xl text-xl transition-all shadow-lg mt-2">確認簽到</button>
                             </form>
                         </div>
                     </div>
                 </section>
 
+                <!-- 大螢幕顯示區 (含動畫強化) -->
                 <section id="display-section" class="hidden w-full h-full flex flex-col items-center justify-center">
-                    <div id="marquee-wall" class="w-screen flex flex-col justify-center space-y-12 overflow-hidden py-10">
+                    <div id="marquee-wall" class="w-screen flex flex-col justify-center space-y-8 overflow-hidden py-10">
                         <div class="marquee-container w-full overflow-hidden"><div id="m-row-1" class="marquee-content"></div></div>
-                        <div class="marquee-container w-full overflow-hidden"><div id="m-row-2" class="marquee-content"></div></div>
+                        <div class="marquee-container w-full overflow-hidden"><div id="m-row-2" class="marquee-content" style="animation-direction: reverse;"></div></div>
                     </div>
-                    <div id="stats-container" class="mt-12">
-                        <div class="bg-black/40 border border-[#E5C07B]/40 rounded-[50px] px-24 py-12 backdrop-blur-3xl shadow-2xl flex flex-col items-center">
-                            <span class="text-lg font-bold uppercase tracking-[0.8em] text-[#E5C07B] mb-8">今日大會累計能量</span>
-                            <div class="flex items-center gap-12" id="stats-visual">
-                                <svg class="w-24 h-24 fill-[#FF4D4D] drop-shadow-[0_0_25px_rgba(255,77,77,0.7)]" viewBox="0 0 24 24">
+                    <div id="stats-container" class="mt-8">
+                        <div class="bg-black/40 border border-[#E5C07B]/40 rounded-[60px] px-20 py-10 backdrop-blur-3xl shadow-2xl flex flex-col items-center">
+                            <span class="text-base font-bold uppercase tracking-[0.8em] text-[#E5C07B] mb-6">今日大會累計能量</span>
+                            <div class="flex items-center gap-10" id="stats-visual">
+                                <svg class="w-20 h-20 fill-[#FF4D4D] drop-shadow-[0_0_25px_rgba(255,77,77,0.7)]" viewBox="0 0 24 24">
                                     <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
                                 </svg>
-                                <span id="total-likes" class="text-[12rem] font-black text-white tabular-nums tracking-tighter leading-none">0</span>
+                                <span id="total-likes" class="text-[10rem] font-black text-white tabular-nums tracking-tighter leading-none transition-all duration-500">0</span>
                             </div>
                         </div>
                     </div>
@@ -255,6 +336,7 @@
         </div>
     </div>
 
+    <!-- 狀態彈窗 -->
     <div id="status-modal" class="fixed inset-0 bg-black/90 backdrop-blur-xl flex items-center justify-center opacity-0 pointer-events-none transition-all z-[100] p-6">
         <div class="glass-panel p-8 rounded-3xl max-w-sm w-full text-center">
             <div id="modal-icon" class="text-5xl mb-4">✨</div>
@@ -287,17 +369,7 @@
         const quotes = [
             "科技領導，引領教育新風範 🚀", "創新人才，培育未來競爭力 💡", "知時愛農，紮根土地情懷 🌱", "健康時尚，展現校園新美學 🧘",
             "教育領航，共創桃園新願景 🏆", "智慧轉型，開啟學習無限可能 ✨", "卓越領導，深耕校園文化底蘊 📚", "全人教育，啟發孩子多元天賦 🌈",
-            "永續校園，建構安全學習環境 🏫", "跨域整合，接軌國際教育脈動 🌏", "校長聚力，點亮桃園教育之光 🕯️", "心繫學子，守護每個成長夢想 💖",
-            "前瞻規劃，厚植學校數位競爭力 💻", "行政支援，精進教學專業品質 🎯", "社區共好，連結在地資源網絡 🤝", "美感教育，提升校園人文素養 🎨",
-            "品格第一，涵養孩子寬廣胸襟 ⚓", "雙語接軌，拓展學生全球視野 🌐", "適性揚才，支持每位多元學習者 🦋", "凝聚共識，打造學校品牌特色 🥇",
-            "翻轉教育，激發學子主動學習力 ⚡", "幸福校園，讓愛在教育中流動 💗", "教育紮根，培育跨世代卓越人才 🎋", "科技賦能，優化智慧教育場域 📡",
-            "環境教育，與大自然共生共榮 🍀", "多元共融，營造友善校園文化 🫂", "專業領航，引領教學卓越團隊 🧗", "深耕閱讀，開啟學子智慧之窗 📖",
-            "生命教育，探索自我無限價值 🧬", "國際教育，培養全球公民素養 🗺️", "美力桃園，型塑校園生活美學 💎", "創新教學，啟發孩子的好奇心 🔍",
-            "卓越行政，厚植校務治理效能 🏛️", "愛與榜樣，引領學子邁向卓越 🕯️", "智慧校園，連結數據與教育溫度 📊", "永續未來，紮根環境與社會責任 🌍",
-            "教育無他，唯愛與榜樣而已 💞", "跨域共學，打破學習的藩籬 🧩", "創意校園，點燃孩子的想像力 🏮", "自信成長，支持學子勇於追夢 ⛵",
-            "教育共好，攜手親師生穩定前行 🎡", "專業對話，激盪教學無限火花 💥", "前瞻教育，迎接未來挑戰 🛡️", "快樂學習，享受成長的每一刻 🎈",
-            "五育並進，培育健全人格發展 🎖️", "智慧領航，開創教育數位新紀元 🖲️", "紮根在地，連結全球卓越教育 🗺️", "校園安全，守護師生幸福堡壘 🏰",
-            "跨越巔峰，帶領校園邁向卓越 ⛰️", "凝聚能量，共創桃園教育新篇章 🖋️"
+            "領航卓越，共築卓越教育藍圖 🗺️", "以學生為中心，點亮孩子生命之光 🕯️"
         ];
 
         async function init() {
@@ -306,12 +378,7 @@
                 const app = initializeApp(firebaseConfig);
                 auth = getAuth(app);
                 db = getFirestore(app);
-                
-                await signInAnonymously(auth).catch(err => {
-                    console.error("Firebase Auth Error:", err.code);
-                    document.getElementById('sync-label').innerText = "連線失敗：" + err.code;
-                });
-
+                await signInAnonymously(auth);
                 onAuthStateChanged(auth, (u) => { 
                     if (u) { 
                         user = u; 
@@ -320,9 +387,7 @@
                         setupSync(); 
                     }
                 });
-            } catch (e) { 
-                document.getElementById('sync-label').innerText = "初始化失敗";
-            }
+            } catch (e) { document.getElementById('sync-label').innerText = "初始化失敗"; }
         }
 
         function setupSync() {
@@ -332,7 +397,6 @@
                 const data = snap.docs.map(d => d.data()).sort((a,b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
                 renderWall(data);
             });
-
             const statsDoc = doc(db, 'artifacts', appId, 'public', 'data', 'stats', `stats-${getTodayId()}`);
             onSnapshot(statsDoc, (snap) => {
                 const count = snap.exists() ? snap.data().likes : 0;
@@ -342,10 +406,7 @@
 
         document.getElementById('guest-form').onsubmit = async (e) => {
             e.preventDefault();
-            if (!user) {
-                showModal('錯誤', '尚未與資料庫連線，請重新整理網頁。');
-                return;
-            }
+            if (!user) return;
             const btn = document.getElementById('submit-btn');
             const now = new Date().toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' });
             const formData = {
@@ -363,41 +424,40 @@
             try {
                 const registrationsRef = collection(db, 'artifacts', appId, 'public', 'data', 'registrations');
                 await addDoc(registrationsRef, formData);
-                if (googleSheetUrl) {
-                    fetch(googleSheetUrl, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ time: now, ...formData }) });
-                }
+                if (googleSheetUrl) fetch(googleSheetUrl, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ time: now, ...formData }) });
                 showModal('簽到成功', '您的祝福已成功同步至牆面！');
                 document.getElementById('guest-form').reset();
-            } catch (err) { 
-                showModal('簽到失敗', '無法寫入資料庫，請檢查權限設定。');
-            } finally { 
-                btn.disabled = false; 
-            }
+            } catch (err) { showModal('簽到失敗', '無法寫入資料庫。'); } finally { btn.disabled = false; }
         };
 
         function animateCount(newCount) {
             const el = document.getElementById('total-likes');
             const visual = document.getElementById('stats-visual');
             if (el) el.innerText = newCount;
-            if (visual) { visual.classList.add('bump'); setTimeout(() => visual.classList.remove('bump'), 200); }
+            if (visual) { 
+                visual.classList.add('bump'); 
+                setTimeout(() => visual.classList.remove('bump'), 300); 
+            }
         }
 
         function renderWall(list) {
             const r1 = document.getElementById('m-row-1'), r2 = document.getElementById('m-row-2');
             if (!r1 || !r2) return;
-            const card = (i) => `
-                <div class="blessing-card">
-                    <div class="text-2xl text-white font-medium mb-5 leading-relaxed">"${i.blessing}"</div>
-                    <div class="flex flex-col gap-1">
-                        <div class="text-4xl text-white font-bold tracking-wide">${i.name}</div>
-                        <div class="text-2xl text-[#E5C07B] font-bold mt-2 uppercase tracking-wider">
-                            <span class="bg-white/10 px-3 py-1 rounded-lg mr-2">[${i.district}]</span> ${i.school}
+            const card = (i, index) => `
+                <div class="blessing-card" style="animation-delay: ${index * 0.1}s">
+                    <div class="district-badge">${i.district}</div>
+                    <div class="blessing-text">"${i.blessing}"</div>
+                    <div class="card-footer">
+                        <div class="author-info">
+                            <div class="author-name">
+                                ${i.name} <span class="author-title">${i.title}</span>
+                            </div>
+                            <div class="school-info">${i.school} · ${i.organization}</div>
                         </div>
-                        <div class="text-xl text-white/50 font-semibold mt-1">${i.title} · ${i.organization}</div>
                     </div>
                 </div>`;
             let h1 = '', h2 = '';
-            list.forEach((item, idx) => { if (idx % 2 === 0) h1 += card(item); else h2 += card(item); });
+            list.forEach((item, idx) => { if (idx % 2 === 0) h1 += card(item, idx); else h2 += card(item, idx); });
             r1.innerHTML = h1 + h1; r2.innerHTML = h2 + h2;
         }
 
@@ -414,20 +474,28 @@
             const rect = btn.getBoundingClientRect();
             const cx = (e.touches ? e.touches[0].clientX : e.clientX) || (rect.left + rect.width / 2);
             const cy = (e.touches ? e.touches[0].clientY : e.clientY) || (rect.top + rect.height / 2);
-            for (let i = 0; i < 6; i++) {
+            for (let i = 0; i < 8; i++) {
                 const h = document.createElement('div'); h.className = 'heart-particle';
-                h.innerHTML = '❤️'; h.style.left = cx + 'px'; h.style.top = cy + 'px';
-                const a = (Math.random() * Math.PI) + Math.PI; const d = 150 + Math.random() * 100;
-                h.style.setProperty('--tx', `${Math.cos(a) * d}px`); h.style.setProperty('--ty', `${Math.sin(a) * d}px`); h.style.setProperty('--tr', `${Math.random() * 360}deg`);
+                h.innerHTML = ['❤️','💖','✨','⭐'][Math.floor(Math.random()*4)]; 
+                h.style.left = cx + 'px'; h.style.top = cy + 'px';
+                const a = (Math.random() * Math.PI) + Math.PI; const d = 150 + Math.random() * 150;
+                h.style.setProperty('--tx', `${Math.cos(a) * d}px`); h.style.setProperty('--ty', `${Math.sin(a) * d}px`); h.style.setProperty('--tr', `${Math.random() * 720}deg`);
                 document.body.appendChild(h); setTimeout(() => h.remove(), 1000);
             }
         }
 
         function createParticles() {
             const c = document.getElementById('particle-container');
-            for (let i = 0; i < 20; i++) {
+            for (let i = 0; i < 30; i++) {
                 const p = document.createElement('div'); p.className = 'particle';
-                p.style.cssText = `width:4px; height:4px; left:${Math.random()*100}%; top:${Math.random()*100}%; animation: float ${Math.random()*5+15}s linear infinite;`;
+                const size = Math.random() * 5 + 2;
+                p.style.cssText = `
+                    width:${size}px; height:${size}px; 
+                    left:${Math.random()*100}%; 
+                    top:${Math.random()*100}%; 
+                    animation: float-complex ${Math.random()*10+20}s linear infinite;
+                    animation-delay: -${Math.random()*20}s;
+                `;
                 c.appendChild(p);
             }
         }
@@ -442,14 +510,7 @@
         document.getElementById('show-input-btn').onclick = () => { document.getElementById('input-section').classList.remove('hidden'); document.getElementById('display-section').classList.add('hidden'); document.getElementById('show-input-btn').classList.add('active'); document.getElementById('show-display-btn').classList.remove('active'); };
         document.getElementById('show-display-btn').onclick = () => { document.getElementById('input-section').classList.add('hidden'); document.getElementById('display-section').classList.remove('hidden'); document.getElementById('show-display-btn').classList.add('active'); document.getElementById('show-input-btn').classList.remove('active'); };
         document.getElementById('event-like-btn').addEventListener('pointerdown', handleLike);
-        
-        // 靈感產生器點擊邏輯
-        document.getElementById('ai-btn').onclick = () => { 
-            const textarea = document.getElementById('blessing');
-            textarea.value = quotes[Math.floor(Math.random()*quotes.length)]; 
-            textarea.classList.add('ring-2', 'ring-sky-400');
-            setTimeout(() => textarea.classList.remove('ring-2', 'ring-sky-400'), 1000);
-        };
+        document.getElementById('ai-btn').onclick = () => { document.getElementById('blessing').value = quotes[Math.floor(Math.random()*quotes.length)]; };
 
         window.onload = init;
     </script>
