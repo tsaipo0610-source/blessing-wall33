@@ -292,26 +292,28 @@
                                 </div>
                                 
                                 <!-- 3. 學校名稱 -->
-                                <input type="text" id="school-name" placeholder="3. 服務單位 / 學校名稱" required class="w-full rounded-xl px-4 py-4 text-white outline-none">
+                                <input type="text" id="school-name" placeholder="3. 代表單位 / 學校名稱" required class="w-full rounded-xl px-4 py-4 text-white outline-none">
                                 
                                 <!-- 4. 職稱 & 5. 姓名 -->
                                 <div class="grid grid-cols-2 gap-4">
                                     <div class="select-wrapper">
                                         <select id="title-select" required class="w-full rounded-xl px-4 py-4 text-white bg-white/10 outline-none">
                                             <option value="" disabled selected>4. 職稱</option>
+                                            <option value="市長">市長</option>
+                                            <option value="市政顧問">市政顧問</option>
                                             <option value="局長">局長</option>
                                             <option value="副局長">副局長</option>
                                             <option value="主任秘書">主任秘書</option>
                                             <option value="專門委員">專門委員</option>
                                             <option value="科長">科長</option>
-                                            <option value="局處主任">主任</option>
+                                            <option value="局處主任">局處主任</option>
                                             <option value="督學">督學</option>
                                             <option value="聘任督學">聘任督學</option>
                                             <option value="校長">校長</option>
                                             <option value="候用校長">候用校長</option>
                                             <option value="館長">館長</option>
                                             <option value="家長會長">家長會長</option>
-                                            <option value="教師會/公會">教師會/公會</option>
+                                            <option value="教師會代表/公會代表">教師會代表/公會代表</option>
                                             <option value="貴賓">貴賓</option>
                                         </select>
                                     </div>
@@ -381,7 +383,7 @@
 
         const getTodayId = () => new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Taipei' });
         
-        // 50 組 AI 靈感語句 (保留)
+        // 100 組 AI 靈感語句 (保留)
         const quotes = [
             // 大會主題: 科技領航、創新人才 (1-25)
             "科技領航，引領桃園教育新風範 🚀", "智慧數位轉型，開啟學習無限可能 ✨", "科技賦能教育，培育跨世代創新人才 💡", "深耕數位素養，厚植未來國際競爭力 🌏", 
