@@ -79,27 +79,26 @@
         .blessing-card { 
             display: inline-flex; 
             flex-direction: column;
-            margin: 1.5rem; 
+            margin: 1rem 1.5rem; 
             background: linear-gradient(165deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.02) 100%);
             backdrop-filter: blur(25px);
-            padding: 2.5rem 3rem; 
-            border-radius: 40px; 
+            padding: 2rem 2.5rem; 
+            border-radius: 35px; 
             border: 1px solid rgba(229, 192, 123, 0.2);
-            min-width: 550px; 
-            max-width: 600px;
+            min-width: 480px; 
+            max-width: 520px;
             position: relative;
             overflow: hidden;
-            box-shadow: 0 30px 80px rgba(0,0,0,0.6);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
             white-space: normal;
             animation: card-reveal 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
         }
 
-        /* 流光邊框效果 */
         .blessing-card::before {
             content: '';
             position: absolute;
             top: 0; left: -100%;
-            width: 100%; height: 4px;
+            width: 100%; height: 3px;
             background: linear-gradient(90deg, transparent, var(--primary-gold), transparent);
             animation: border-flow 4s infinite linear;
         }
@@ -118,22 +117,22 @@
             display: inline-block;
             background: rgba(229, 192, 123, 0.15);
             color: var(--primary-gold);
-            padding: 4px 16px;
+            padding: 3px 14px;
             border-radius: 100px;
-            font-size: 1rem;
+            font-size: 0.9rem;
             font-weight: 700;
             letter-spacing: 2px;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1rem;
             border: 1px solid rgba(229, 192, 123, 0.3);
             text-shadow: 0 0 10px rgba(229, 192, 123, 0.5);
         }
 
         .blessing-text {
-            font-size: 2.8rem;
+            font-size: 2.2rem;
             color: #ffffff;
             font-weight: 500;
-            line-height: 1.4;
-            margin-bottom: 2rem;
+            line-height: 1.3;
+            margin-bottom: 1.5rem;
             position: relative;
             animation: text-float 5s ease-in-out infinite;
         }
@@ -148,38 +147,37 @@
             align-items: center;
             justify-content: space-between;
             border-top: 1px solid rgba(255, 255, 255, 0.1);
-            padding-top: 1.5rem;
+            padding-top: 1.2rem;
             margin-top: auto;
         }
 
         .author-name {
-            font-size: 2.2rem;
+            font-size: 1.8rem;
             font-weight: 700;
             color: #fff;
             display: flex;
             align-items: baseline;
-            gap: 12px;
+            gap: 10px;
         }
 
         .author-title {
-            font-size: 1.2rem;
+            font-size: 1rem;
             color: rgba(255,255,255,0.4);
             font-weight: 300;
         }
 
         .school-info {
-            font-size: 1.4rem;
+            font-size: 1.2rem;
             color: var(--primary-gold);
             font-weight: 500;
             letter-spacing: 1px;
-            margin-top: 6px;
+            margin-top: 4px;
             opacity: 0.9;
         }
 
-        .marquee-content { display: inline-flex; animation: marquee 60s linear infinite; white-space: nowrap; }
+        .marquee-content { display: inline-flex; animation: marquee 70s linear infinite; white-space: nowrap; }
         @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
 
-        /* 輸入框微動畫 */
         input:focus, textarea:focus, select:focus {
             background: rgba(255, 255, 255, 0.15);
             border-color: var(--primary-gold);
@@ -232,7 +230,7 @@
 
         <div class="flex flex-col h-full overflow-hidden">
             <!-- 頁首標題 -->
-            <header class="mb-4 lg:mb-8 text-center lg:text-left shrink-0">
+            <header class="mb-4 lg:mb-6 text-center lg:text-left shrink-0">
                 <div class="text-[10px] lg:text-xl font-light tracking-[0.3em] text-[#E5C07B] uppercase mb-1">科技領導 創新人才 / 知食愛農 健康時尚</div>
                 <h1 class="text-xl lg:text-5xl font-bold tracking-tight text-white border-t-2 border-white/10 pt-3">
                     114 學年度第二學期校長會議
@@ -261,7 +259,6 @@
                     <div class="lg:col-span-3">
                         <div class="glass-panel p-6 lg:p-8 rounded-3xl">
                             <form id="guest-form" class="space-y-4">
-                                <!-- 調整順序：1. 組別 -->
                                 <div class="grid grid-cols-2 gap-4">
                                     <div class="select-wrapper">
                                         <select id="organization-select" required class="w-full rounded-xl px-4 py-4 text-white bg-white/10 outline-none">
@@ -278,7 +275,6 @@
                                             <option value="教師團體">教師團體</option>
                                         </select>
                                     </div>
-                                    <!-- 2. 行政區 -->
                                     <div class="select-wrapper">
                                         <select id="district-select" required class="w-full rounded-xl px-4 py-4 text-white bg-white/10 outline-none">
                                             <option value="" disabled selected>2. 行政區</option>
@@ -291,10 +287,8 @@
                                     </div>
                                 </div>
                                 
-                                <!-- 3. 學校名稱 -->
                                 <input type="text" id="school-name" placeholder="3. 代表單位 / 學校名稱" required class="w-full rounded-xl px-4 py-4 text-white outline-none">
                                 
-                                <!-- 4. 職稱 & 5. 姓名 -->
                                 <div class="grid grid-cols-2 gap-4">
                                     <div class="select-wrapper">
                                         <select id="title-select" required class="w-full rounded-xl px-4 py-4 text-white bg-white/10 outline-none">
@@ -330,14 +324,18 @@
                     </div>
                 </section>
 
-                <!-- 大螢幕顯示區域 -->
+                <!-- 大螢幕顯示區域 (已增加到 3 列跑馬燈) -->
                 <section id="display-section" class="hidden w-full h-full flex flex-col items-center justify-between overflow-hidden">
-                    <div id="marquee-wall" class="w-screen flex-grow flex flex-col justify-center gap-4 lg:gap-8 overflow-hidden">
+                    <div id="marquee-wall" class="w-screen flex-grow flex flex-col justify-center gap-2 lg:gap-4 overflow-hidden">
+                        <!-- 第一列：向左 -->
                         <div class="marquee-container"><div id="m-row-1" class="marquee-content"></div></div>
+                        <!-- 第二列：向右 (reverse) -->
                         <div class="marquee-container"><div id="m-row-2" class="marquee-content" style="animation-direction: reverse;"></div></div>
+                        <!-- 第三列：向左 -->
+                        <div class="marquee-container"><div id="m-row-3" class="marquee-content"></div></div>
                     </div>
 
-                    <div id="stats-container" class="mb-10 lg:mb-16 shrink-0 scale-75 lg:scale-80">
+                    <div id="stats-container" class="mb-6 lg:mb-10 shrink-0 scale-[0.6] lg:scale-75">
                         <div class="bg-black/60 border-2 border-[#E5C07B]/40 rounded-[100px] px-12 lg:px-24 py-6 lg:py-10 backdrop-blur-3xl shadow-2xl flex flex-col items-center">
                             <span class="text-xs lg:text-xl font-bold uppercase tracking-[0.8em] text-[#E5C07B] mb-2 lg:mb-6">今日大會累計教育能量</span>
                             <div class="flex items-center gap-6 lg:gap-12" id="stats-visual">
@@ -383,33 +381,25 @@
 
         const getTodayId = () => new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Taipei' });
         
-        // 150 組 AI 靈感語句 (保留)
         const quotes = [
-            // 大會主題: 科技領航、創新人才 (1-25)
             "科技領航，引領桃園教育新風範 🚀", "智慧數位轉型，開啟學習無限可能 ✨", "科技賦能教育，培育跨世代創新人才 💡", "深耕數位素養，厚植未來國際競爭力 🌏", 
             "創新思維領航，打造智慧校園新標竿 🏫", "科技融合教學，激發學子主動學習力 ⚡", "智慧教育紮根，開創桃園學習新紀元 📡", "前瞻科技領導，點亮孩子智慧之光 🕯️",
             "數位與人文並重，共築智慧學習堡壘 🏰", "科技賦能創新，引領教學卓越精進 🎯", "推動智慧治理，優化校務領導效能 🏛️", "科技串連未來，縮短數位學習落差 🌉",
             "數據驅動決策，落實精準教育目標 📊", "科技跨域整合，接軌國際教育脈動 🌐", "智慧領航校園，培育卓越接班人才 🥇", "數位轉型引發變革，創新能源永續發展 🔋",
             "科技智慧共享，營造均優學習環境 🤝", "科技創新不設限，開啟教育多元視窗 🖼️", "智慧校園新藍圖，科技共創美好未來 🗺️", "科技引領轉型，深耕桃園教育品質 💎",
             "數位時代領頭羊，桃園教育勇往直前 🐏", "科技與智慧交織，編織學子夢想羽翼 🦋", "智慧化教學環境，讓學習更即時更有趣 🎮", "科技驅動教育，桃園共創智慧亮點 🌟", "深耕智慧桃園，科技賦能教育轉型 🛰️",
-
-            // 大會主題: 知食愛農、健康時尚 (26-50)
             "知食愛農，紮根土地與生命情懷 🌱", "健康時尚校園，展現校園新美學 🧘", "食農教育紮根，體驗生命永續價值 🍎", "美感時尚領航，提升師生人文素養 🎨",
             "走入自然探索，建構綠色校園新視界 🌳", "健康生活時尚，培育身心健全下一代 🏃", "知食愛農共學，深耕在地文化底蘊 🎋", "時尚美學教育，型塑校園優雅風氣 💎",
             "守護大地情懷，推廣低碳綠能校園 ♻️", "健康時尚運動，活力桃園動起來 🏀", "食農體驗共好，連結產地與餐桌智慧 🍽️", "美力桃園教育，讓美學融入日常生活 🎭",
             "愛農護土情操，培育環境永續公民 🌍", "時尚新風潮，桃園校園美力大爆發 🎆", "健康飲食文化，建立校園優質生活圈 🥗", "知食愛農生活，感受四季教育之美 🍂",
             "時尚創意領導，開拓美感教育新境界 👠", "綠能健康導向，構築幸福校園新願景 🏡", "知食愛農共榮，打造食農教育示範區 🌾", "時尚美學生活，讓教育更有質感 🥂",
             "健康運動時尚，展現青少年熱血活力 🔥", "知食愛農情深，守護桃園在地瑰寶 🎑", "美感時尚校園，開啟視覺藝術新對話 🖌️", "健康快樂學習，營造溫度的校園 💓", "知食愛農教育，深植土地永續精神 🌻",
-
-            // 教育哲理與熱誠 (51-75)
             "教育無他，唯愛與榜樣而已 💞", "品格第一，涵養孩子寬廣胸襟 ⚓", "全人教育領航，支持學子適性揚才 🦋", "卓越領導團隊，引領校務發展巔峰 ⛰️",
-            "教育共好同行，攜手親師生溫暖守護 🎡", "深耕教育福田，點亮孩子幸福未來 🕯️", "專業領導對話，激盪教學無限火花 💥", "生命教育探索，發現自我無限價值 🧬",
+            "教育共好同行，攜手親師生溫溫馨守護 🎡", "深耕教育福田，點亮孩子幸福未來 🕯️", "專業領導對話，激盪教學無限火花 💥", "生命教育探索，發現自我無限價值 🧬",
             "愛與信任交織，織就學子成長搖籃 🧶", "專業領航教育，打造優質教學品牌 🥇", "熱誠點亮希望，守護每顆純真初心 💎", "教育向下紮根，綻放卓越學習之花 🌺",
             "守護孩子夢想，成為學子成長後盾 🛡️", "教育領航卓越，共創桃園百年大計 🖋️", "溫暖教育園丁，辛勤耕耘學子心田 🧑‍🌾", "品德修養為基，涵養未來公民素養 ⛩️",
             "教育傳承希望，引領學子邁向卓越 ⛵", "愛在校園流動，營造溫馨學習氛圍 🎈", "專業卓越帶領，型塑學校優質文化 🏛️", "生命影響生命，成就孩子非凡未來 🌠",
             "教育紮根深耕，桃園教育持續卓越 🏆", "熱誠引領改變，創造教育無限可能 🌈", "專業引領轉型，建構未來教育模組 🧩", "教育情懷常在，守護學子勇敢逐夢 🚀", "與愛共舞教育，舞出學子精彩生命 🩰",
-
-            // 感性祝福與願景 (76-100)
             "會議圓滿成功，桃園教育再創巔峰 🎊", "校長聚力同行，共譜桃園教育新篇 🖋️", "攜手並進共好，開創教育美好未來 🤝", "能量滿滿簽到，為桃園校長們加油 ⛽",
             "智慧領航桃園，會議圓滿順利成功 🎉", "桃園教育卓越，校長會議精彩無限 🌈", "凝聚教育共識，攜手邁向轉型之路 🛤️", "校長會議大會，共創智慧教育奇蹟 🪄",
             "桃園教育新展望，願景起飛圓滿達成 ✈️", "活力桃園教育，會議大會成功滿載 🎒", "智慧交流共好，桃園教育卓越領先 🏁", "圓滿會議盛典，點燃教育創新火種 🔥",
@@ -476,17 +466,20 @@
             } catch (err) { showModal('錯誤', '儲存失敗。'); } finally { btn.disabled = false; }
         };
 
-        function animateCount(newCount) {
+        function animateCount(count) {
             const el = document.getElementById('total-likes');
             const visual = document.getElementById('stats-visual');
-            if (el) el.innerText = newCount;
+            if (el) el.innerText = count;
             if (visual) { visual.classList.add('bump'); setTimeout(() => visual.classList.remove('bump'), 200); }
         }
 
         function renderWall(list) {
-            const r1 = document.getElementById('m-row-1'), r2 = document.getElementById('m-row-2');
-            if (!r1 || !r2) return;
-            const card = (i) => `
+            const r1 = document.getElementById('m-row-1'), 
+                  r2 = document.getElementById('m-row-2'),
+                  r3 = document.getElementById('m-row-3');
+            if (!r1 || !r2 || !r3) return;
+
+            const cardTemplate = (i) => `
                 <div class="blessing-card">
                     <div class="district-badge">${i.district}</div>
                     <div class="blessing-text">"${i.blessing}"</div>
@@ -495,9 +488,19 @@
                         <div class="school-info">${i.school}</div>
                     </div>
                 </div>`;
-            let h1 = '', h2 = '';
-            list.forEach((item, idx) => { if (idx % 2 === 0) h1 += card(item); else h2 += card(item); });
-            r1.innerHTML = h1 + h1; r2.innerHTML = h2 + h2;
+
+            let h1 = '', h2 = '', h3 = '';
+            list.forEach((item, idx) => {
+                const html = cardTemplate(item);
+                if (idx % 3 === 0) h1 += html;
+                else if (idx % 3 === 1) h2 += html;
+                else h3 += html;
+            });
+
+            // 複製一份以達成無縫捲動
+            r1.innerHTML = h1 + h1; 
+            r2.innerHTML = h2 + h2;
+            r3.innerHTML = h3 + h3;
         }
 
         async function handleLike(e) {
